@@ -1,0 +1,166 @@
+body {
+}
+
+#root{
+}
+
+.node {
+    padding: 2px;
+    position: relative;
+    margin-top: 0.5em;
+    margin-left: 1em;
+    display: block;
+}
+
+input[type=input]{
+    border-top: 0px;
+    border-bottom: 1px solid rgba(170,170,170,0.55);
+    border-left: 0px;
+    border-right: 0px;
+    width: 80%;
+}
+
+body, #root, input[type=input]{
+    background: rgb(40,40,40);
+    color: rgb(170,170,170);
+}
+
+.hidden{
+    max-height: 0px;
+    overflow: hidden;
+    transition: 0.5s ease-in-out;
+}
+
+.visible{
+    max-height: 4000px;
+    transition: 0.5s ease-in-out;
+
+}
+
+.hidbutton:after, .hidbutton-show:after, .hidbutton-show:before{
+    background: rgb(160,160,160)
+}
+.header {
+    display: flex;
+    width: 40%;
+    height: 20%;
+    flex-direction: row;
+    align-items: center;
+    left: 0px;
+    bottom:  0px;
+    /*width:20%;*/
+}
+    
+.button{
+    display: flex;
+    width: 13px;
+    height: 13px;
+    margin-left: 0%;
+    transition: 0.5s ease-in-out;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.butbox {
+    display: flex;
+    flex-direction: row;        
+    position: relative;
+    left: -10%;
+    top: 200%;
+    padding-left: 4px;
+    padding-right: 4px;
+    transition: 0.1s;
+}
+.butbox:hover{
+    transform: scale(1.6);
+    transform-origin: center center;
+    transition: 0.1s;
+}
+
+.butbox:hover .button{
+    border-radius: 10%;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+.butbox:hover .button:hover{
+    transform: scale(1.4);
+    transform-origin: center center;
+    transition: 0.2s ease-in-out;
+}
+
+.dragbutton {
+    background: rgb(20,00,99);
+}
+.addbutton {
+    background: rgb(50,99,0);
+}
+.delbutton {
+    background: rgb(99,20,10);
+}
+
+.hidbutton {
+    background: rgb(110,110,20);
+}
+
+.hidbutton:after {
+    content: "";
+    position: relative;
+    left: 20%;
+    top: 43%;
+    width: 56%;
+    height:15%;    
+}
+
+.hidbutton-show:after{
+    content: "";
+    position: relative;
+    left: -17%;
+    top: 20%;
+    width: 16%;
+    height: 62%;
+}
+
+.hidbutton-show:before{
+    content: "";
+    position: relative;
+    left: 20%;
+    top: 46%;
+    width: 58%;
+    height:15%;
+}
+
+.overtop:after {
+    content: "";
+    position: absolute;
+    background: rgb(150,150,150);
+    width: 30px;
+    height: 1px;
+    top: 0px;
+    left: 5px;
+    width: 25px;
+}
+
+.overbot:after {
+    content: "";
+    position: absolute;
+    background: rgb(150,150,150);
+    width:30px;
+    height: 1px;
+    bottom: 0px;
+    left: 5px;
+    width: 25px;
+}
+
+.overmid:after {
+    content: "";
+    position: absolute;
+    background: rgb(150,150,150);
+    width: 1px;
+    height: 14px;
+    left: 0px;
+    top: 7px;
+}
+
