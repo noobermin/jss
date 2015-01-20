@@ -34,10 +34,7 @@ function hasclass(el){
 }
 
 //traversing child nodes, avoiding headers...
-function iskiddiv(c){return c.nodeName == "DIV";}
-function kiddivs(parent){
-    return slice(parent.childNodes[1].childNodes);
-}
+function kiddivs(parent){return  slice(parent.childNodes[1].childNodes);}
 //this isn't very elegant imo...
 function allkids(parent){
     var kids = kiddivs(parent);
@@ -52,9 +49,7 @@ var drag=null;
 var Drag = function(src) {
     this.src=src;
     this.kid_ids=map(allkids(src),idof);
-    this.parent = src.parentElement;
-    console.log(this.kid_ids);
-    console.log(this.src);
+    this.parent = src.parentElement.parentElement;
 };
 Drag.prototype.valid_target = function (obj) {
     var objid = idof(obj);
@@ -107,10 +102,10 @@ Drag.drop = function(e){
     if (!hasclass(e.target,"header"))
 	return true;
     var dest = e.target.parentElement;
-    console.log(dest);
     if (!drag.valid_target(dest)) {
 	return true;
     }
+    var oldparent=drag.src.parentElement.parentElement;
     var i = overarea(target.getBoundingClientRect(),e.clientY);	
     if (i == 1) {
 	insert_before(drag.src,dest);
@@ -298,15 +293,20 @@ function hide_toggle(id) {
 
 
 function save() {
+    
     function save_r(el) {
 	return {
 	    text:     byid(idof(el)+'-input').value,
 	    children: maptodivs(el,function(c){ return save_r(c);})
 	};
     }
-    var trees = map(byid('root-children').children,function(c){return save_r(c);});
-    
-    docCookies.setItem('tree', JSON.stringify(trees), Infinity);
+    console.log("saving...");
+    map(byid('root-children').children,
+	save_r
+    ).map(function(c,i){
+	docCookies.setItem('tree'+i,JSON.stringify(c),Infinity);
+    });
+    console.log("done saving.");
 }
 
 function del(me) {
@@ -328,13 +328,12 @@ function restore()
 	});
 	return child;
     }
-    
-    var c = JSON.parse(docCookies.getItem('tree'));
-    if (!c) return;
-    map(c,function(cur){
-	var child = restore_r("root",cur,false);
+    for(var i=0;docCookies.hasItem('tree'+i);++i) {
+	var child=restore_r("root",
+			    JSON.parse(docCookies.getItem('tree'+i)),
+			    false);
 	hide_toggle(idof(child));
-    });
+    }
 }
 
 function clean(){ docCookies.removeItem('tree');}
@@ -345,7 +344,7 @@ function init()
 	this.num=0;
 	this.up = function() {
 	    this.num+=1;
-	    if ( this.num > 15 ) {
+	    if ( this.num > 10 ) {
 		console.log("auto-saving...");
 		save();
 		this.num=0;
