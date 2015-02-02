@@ -77,10 +77,9 @@ function mkpostreader(handler,passResponse,nonPostErr){
     };
 }
 
-};
 var users = {
-    "yidie"     : ["pancakes",1];
-    "noobermin" : ["1234",2];
+    "yidie"     : ["pancakes",1],
+    "noobermin" : ["1234",2]
 };
 
 function check_login(username, password) {
@@ -88,6 +87,7 @@ function check_login(username, password) {
 	&& users[username][0]===password )
 	return users[username][1];
 }
+function userfile(ui){return 'forest/'+ui+'.json';}
 
 var site = {
     '/tree.html': mkfileread("text/html"),
@@ -95,8 +95,6 @@ var site = {
     '/htm.js':    mkfileread("text/plain"),
     '/cookies.js':mkfileread("text/plain"),
     '/tree.css':  mkfileread("text/css"),
-    '/login.css':  mkfileread("text/css"),
-    '/test.html': mkfileread("text/html"),
     '/login' : mkpostreader(function(data,req,res){
 	var d = querystring.parse(data);
 	if( check_login(d.username,d.password) ) {
@@ -112,18 +110,36 @@ var site = {
     },true),
     '/get':mkpostreader(function(data,req,res){
 	var d = querystring.parse(data);
-	if (!check_login(d.username,d.password){
+	var ui = check_login(d.username,d.password);
+	if (!ui){
 	    res.writeHead(403, {'Content-Type': 'text/plain'});
 	    res.end('bad login');
 	    return;
 	}
-	
+	fs.readFile(userfile(ui),function (err,data){
+	    if(err) throw err;
+	    res.writeHead(200,{'Content-Type':'plain/text'});
+	    res.end(data);
+	});
     },true),
     '/reader.html': mkfileread("text/html"),
     '/write':  mkpostreader(function(data,req,res){
+	var d = querystring.parse(data);
+	var ui = check_login(d.username,d.password);
+	if (!ui){
+	    res.writeHead(403, {'Content-Type': 'text/plain'});
+	    res.end('bad login');
+	    return;
+	}
+	data  = decodeURI(d.data);
 	console.log("recieved:");
-	console.log(data);	
-    }),
+	console.log(data);
+	fs.writeFile(userfile(ui),data,function(err) {
+	    if(err) throw err;
+	    res.writeHead(200, {'Content-Type': 'text/plain'});
+	    res.end('good login');
+	});
+    },true),
     '/test' : function(req,res) {
 	res.writeHead(200,{'Content-Type':  'text/html'});
 	res.end('<html><body></body></html>');

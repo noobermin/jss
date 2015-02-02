@@ -230,7 +230,6 @@ function hide_toggle(id) {
 
 
 function save(loginfo) {
-    console.log("got %o",loginfo);
     function save_r(el) {
 	return {
 	    text:     byid(idof(el)+'-input').value,
@@ -257,9 +256,9 @@ function save(loginfo) {
     });
     xhr.open("POST","/write",true);
     xhr.setRequestHeader('Content-type', 'application/x-www-from-urlencoded');
-    var qs = 'data='+encodeURIComponent(JSON.stringify(data));
-    console.log(qs);
-    xhr.send(qs);    
+    xhr.send('data='+encodeURIComponent(JSON.stringify(data))+
+	     '&username='+loginfo.uname+
+	     '&password='+loginfo.passwd);  
 }
 
 function del(me) {
@@ -270,8 +269,19 @@ function del(me) {
     del_hide(container.parentElement);
 }
 
-function restore(loginfo)
-{
+function restore_req(loginfo) {
+    xhr=mkxhr();
+    xhr.onreadystatechange = function() {
+	console.log("got response");
+	if(xhr.readyState === 4 && xhr.status === 200)
+	    restore(xhr.responseText)
+    };
+    xhr.open("POST","/get",true);
+    xhr.send("username="+loginfo.uname+
+	     "&password="+loginfo.passwd);
+}
+
+function restore(data) {
     
     function restore_r(nodeid,cur,mkrm/*dirty hack*/)
     {	
@@ -282,17 +292,22 @@ function restore(loginfo)
 	});
 	return child;
     }
-    if (loginfo) {
-	
-    }
-    for(var i=0;docCookies.hasItem('tree'+i);++i) {
+    console.log(data);
+    var d=JSON.parse(data);
+    console.log(d);
+    d.map(function(c) {
+	var child=restore_r("root",c,false);
+	hide_toggle(idof(child));
+    });
+    
+    /*for(var i=0;docCookies.hasItem('tree'+i);++i) {
 	var child=restore_r(
 	    "root",
 	    JSON.parse(docCookies.getItem('tree'+i)),
 	    false
 	);
 	hide_toggle(idof(child));
-    }
+    }*/
 }
 
 function clean(){ docCookies.removeItem('tree');}
@@ -385,7 +400,7 @@ function initapp(loginfo) {
 	this.num=0;
 	this.up = function() {
 	    this.num+=1;
-	    if ( this.num > 10 ) {
+	    if ( this.num > 20 ) {
 		console.log("auto-saving...");
 		save(_loginfo);
 		this.num=0;
@@ -408,5 +423,5 @@ function initapp(loginfo) {
 	notify("We we're unable to log in...<br/>"
 	      +"Data will not be saved.");
     },100);
-    restore(loginfo);
+    else restore_req(loginfo);
 }
