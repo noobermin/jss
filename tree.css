@@ -1,9 +1,5 @@
-body {
-}
-
-#root{
-}
-
+@textcolor: rgb(170,170,170);
+@highlight: rgb(180,180,180);
 .node {
     padding: 2px;
     position: relative;
@@ -12,7 +8,7 @@ body {
     display: block;
 }
 
-input[type=input]{
+input[type=input].textinput{
     border-top: 0px;
     border-bottom: 1px solid rgba(170,170,170,0.55);
     border-left: 0px;
@@ -20,9 +16,9 @@ input[type=input]{
     width: 80%;
 }
 
-body, #root, input[type=input]{
+body, #root, input[type=input].textinput{
     background: rgb(40,40,40);
-    color: rgb(170,170,170);
+    color: @textcolor;
 }
 
 .hidden{
@@ -163,4 +159,97 @@ body, #root, input[type=input]{
     left: 0px;
     top: 7px;
 }
+/*
+// modal
+*/
 
+.modal:before {
+    content: "";
+    display: block;
+    background: #333;
+    position: fixed;
+    top:0; left: 0; right: 0; bottom:0;
+    z-index: 10;
+    animation-name: fadein;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-out;
+    animation-duration: 0.4s;
+    animation-fill-mode: forwards;
+}
+
+
+.modal-diag {
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    margin-left:-180px;
+    padding: 20px;
+    border-radius: 2px;
+    width: 360px;
+    box-shadow: 2px 2px 5px 6px #222;
+    /*margin-left: auto;*/
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    z-index: 11;
+    opacity: 1.0;
+}
+.textbut{
+    background: rgb(100,100,100);
+    border: 0px;
+    color: @textcolor;
+    text-decoration: none;
+    text-align: center;
+    min-width: 60px;
+    &:hover{
+	color: @highlight; 
+    }
+}
+
+
+#login form{
+    margin: 40px auto;
+}
+
+#login div{
+    margin: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.modal-diag.drop{
+    animation-name: dropdiag;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-out;
+    animation-duration:0.5s;
+}
+
+.modal-diag.away{
+    animation-name: updiag;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-out;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+}
+
+/*
+ * Animations
+ */
+
+@keyframes fadein {
+      0% {opacity: 0.0;}
+    100% {opacity: 0.6;}
+}
+
+@keyframes dropdiag {
+    0% {transform: translateY(-400px);}
+    100% {transform: translateY(0);}
+}
+
+@keyframes updiag{
+    0% {transform: translateY(0);}
+    35% {transform: translateY(10px);}
+    100% {transform: translateY(-400px);}
+}

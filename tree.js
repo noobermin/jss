@@ -1,40 +1,7 @@
 var ids=0;
 
-//aliases
-function byid(id){return document.getElementById(id);}
-function idof(el){return el.getAttribute("id");}
-//my syntatic sugar (slow?)
-function mkarraycall(callname) {
-    return Array.prototype[callname].call.bind(Array.prototype[callname]);
-}
-
-//my "functional" redefinition of these functions
-map = mkarraycall("map");
-filter = mkarraycall("filter");
-concat = mkarraycall("concat");
-reduce = mkarraycall("reduce");
-slice = mkarraycall("slice");
-
-//convience functions
-function has(arraylike,ino){return filter(arraylike,function(c){return c == ino}).length > 0;}
-function last(arraylike){ return arraylike[arraylike.length-1]; }
-function setlast(arraylike,d){ arraylike[arraylike.length-1]=d; }
-function rmclass(el) {
-    el.classList.remove.apply(el.classList,
-			      slice(arguments,1,arguments.length));
-}
-function addclass(el) {
-    el.classList.add.apply(el.classList,
-			   slice(arguments,1,arguments.length));
-    return el;
-}
-function hasclass(el){
-    return el.classList.contains.apply(el.classList,
-				       slice(arguments,1,arguments.length));
-}
-
 //traversing child nodes, avoiding headers...
-function kiddivs(parent){return  slice(parent.childNodes[1].childNodes);}
+function kiddivs(parent){return slice(parent.childNodes[1].childNodes);}
 //this isn't very elegant imo...
 function allkids(parent){
     var kids = kiddivs(parent);
@@ -125,63 +92,33 @@ Drag.end = function(e) {
     drag = null;
 };
 
-
-
-//auto-save
+//saver
 var saver = saver || {};
-
-function evlis(el,type,f,pass) {
-    (!pass || pass != false) && (pass = true);
-    el.addEventListener(type,f,pass);
-    return el;
-}
-function evliss() {
-    for(var i=1; i< arguments.length; i+=2)
-	evlis(arguments[0], arguments[i], arguments[i+1],false);
-    return arguments[0];
-}
-
-//make elements
-function mkel(type, attr, classes, val) {
-    var ret = document.createElement(type);
-    if (attr) for (prop in attr)
-	ret[prop] = attr[prop];
-    if (classes)
-	map(classes, function(c){return addclass(ret,c);})
-    if (val)ret.innerHTML = val;
-    return ret;
-}
     
 function mkbutton(id, classes, clickf){
-    var ret = mkel("span", {"id":id}, classes, "");
-    addclass(ret,'button');
-    evlis(ret,"click",function(){saver.up();});
-    if(clickf) evlis(ret,"click", clickf);
-    return ret;
+    var ret =
+    $mkel("span",{"id":id},
+	  concat(classes,['button']),""
+    ).evlis("click",function(){saver.up();});
+    if(clickf)ret.evlis("click", clickf);
+    return ret.el;
 }
 
 function mkinput(id, classes, val, inputf) {
-    var ret = mkel("input",
-		   {"id" :id,"value":val,"type" :"input"},
-		   classes,
-		   "");
-    evlis(ret,"input",function(){saver.up();});
-    if (inputf) evlis(ret, "input", inputf);
-    return ret;
+    var ret =
+    $mkel("input",
+	  {"id" :id,"value":val,"type" :"input"},
+	  classes,""
+    ).evlis("input",function(){saver.up();});
+    if (inputf) ret.evlis("input", inputf);
+    return ret.el;
 }
 function mkdiv(id, classes, inner) {
     return mkel("div", {"id":id}, classes, inner);
 }
-
-//insertion convienience
-function insert_after(el, before) {
-    before.parentElement.insertBefore(el,before.nextSibling);
+function mkspan(id, classes, inner) {
+    return mkel("span", {"id":id}, classes, inner);
 }
-
-function insert_before(el, after) {
-    after.parentElement.insertBefore(el,after);
-}
-
 
 function mkoverarea(s){
     return (function (r,y)
@@ -203,7 +140,7 @@ function make_child(parentid,text,makeHideButton=true)
     child.appendChild(header);
     child.appendChild(grandkids);
     
-    var line = mkinput(myid+"-input",[],text);
+    var line = mkinput(myid+"-input",["textinput"],text);
     header.appendChild(line);
 
     var butbox = mkdiv(myid+"-butts",["butbox"]);
@@ -235,7 +172,7 @@ function make_child(parentid,text,makeHideButton=true)
 	   "dragleave",Drag.leave,
 	   "drop",     Drag.drop);
 
-
+    
     var parent_container = byid(parentid+"-children");
     parent_container.appendChild(child);
     //getting hide state
@@ -292,8 +229,8 @@ function hide_toggle(id) {
 }
 
 
-function save() {
-    
+function save(loginfo) {
+    console.log("got %o",loginfo);
     function save_r(el) {
 	return {
 	    text:     byid(idof(el)+'-input').value,
@@ -301,12 +238,28 @@ function save() {
 	};
     }
     console.log("saving...");
-    map(byid('root-children').children,
-	save_r
-    ).map(function(c,i){
-	docCookies.setItem('tree'+i,JSON.stringify(c),Infinity);
+    // map(byid('root-children').children,
+    // 	save_r
+    // ).map(function(c,i){
+    // 	docCookies.setItem('tree'+i,JSON.stringify(c),Infinity);
+    // });
+    
+    var data = map(byid('root-children').children, save_r);
+    var xhr = mkxhr();
+    xhr.onreadystatechange = (function(){
+	if (xhr.readyState === 4 && xhr.status === 200) {
+	    var res = xhr.responseText;
+	    console.log("server response: %s",res);
+	    console.log("done saving");
+	} else {
+	    console.log("error saving");
+	}
     });
-    console.log("done saving.");
+    xhr.open("POST","/write",true);
+    xhr.setRequestHeader('Content-type', 'application/x-www-from-urlencoded');
+    var qs = 'data='+encodeURIComponent(JSON.stringify(data));
+    console.log(qs);
+    xhr.send(qs);    
 }
 
 function del(me) {
@@ -317,8 +270,9 @@ function del(me) {
     del_hide(container.parentElement);
 }
 
-function restore()
+function restore(loginfo)
 {
+    
     function restore_r(nodeid,cur,mkrm/*dirty hack*/)
     {	
 	var child  = make_child(nodeid,cur.text,mkrm);
@@ -328,38 +282,131 @@ function restore()
 	});
 	return child;
     }
+    if (loginfo) {
+	
+    }
     for(var i=0;docCookies.hasItem('tree'+i);++i) {
-	var child=restore_r("root",
-			    JSON.parse(docCookies.getItem('tree'+i)),
-			    false);
+	var child=restore_r(
+	    "root",
+	    JSON.parse(docCookies.getItem('tree'+i)),
+	    false
+	);
 	hide_toggle(idof(child));
     }
 }
 
 function clean(){ docCookies.removeItem('tree');}
 
-function init()
-{
-    saver = new (function(){
+function init() {
+    login();
+}
+
+function login() {
+    var body=document.body;
+    var login = mkdiv("login",['modal-diag','drop']);
+    login.innerHTML =
+    '<form method="post" action="/login" id="loginform"\
+      onsubmit="checklogin(this); return false;">\
+      <div>\
+       <label for="username">Username:</label><input type="input" name="username" id="username"/>\
+      </div>\
+      <div>\
+       <label for="password">Password:</label><input type="password" name="password" id="password"/>\
+      </div>\
+      <div>\
+       <button type="submit" class="textbut">Submit</button>\
+      </div>\
+     </form>'; 
+    body.appendChild(login);
+}
+
+function checklogin(form) {
+    xhr=mkxhr();
+    //for now...
+    var loginfo = {uname:byid("username").value,
+		  passwd:byid("password").value};
+    xhr.onreadystatechange = function() {
+	if (xhr.readyState===4) {
+	    if (xhr.status===200) {
+		console.log("success");
+	    }
+	    else if (xhr.status===403) {
+		console.log("fail");
+		loginfo=null;
+	    }
+	    var lg = byid('login');
+	    $(lg).rmclass("drop").addclass("away");
+	    console.log(lg.classList);
+	    window.setTimeout(function(){
+		initapp(loginfo);
+	    },1000);
+	}
+    }
+    xhr.open("post", form.action, true);
+    xhr.setRequestHeader('Content-type', 'application/x-www-from-urlencoded');
+    try { xhr.send("username="+loginfo.uname+
+		   "&password="+loginfo.passwd); }
+    catch (e) {}
+}
+
+function strip(){
+    var body = document.body;
+    while (body.hasChildNodes())
+	body.removeChild(body.lastChild);
+}
+
+function notify(message){
+    var bg = mkdiv("modalbg",["modal"]);
+    document.body.appendChild(bg);
+    var diag = mkdiv(
+	"diag",["modal-diag","drop"],
+	message
+    );
+    bg.appendChild(diag);
+    diag.appendChild(
+	$(mkspan("modal-button",["textbut"],"ok")).evlis(
+	    "click",
+	    function(){
+		$(diag).rmclass(
+		    "drop"
+		).addclass(
+		    "away"
+		);
+		setTimeout(function(){
+		    document.body.removeChild(bg);
+		},500);
+	    }
+	).el);
+}
+
+function initapp(loginfo) {
+    strip();
+    saver = new (function(_loginfo){
 	this.num=0;
 	this.up = function() {
 	    this.num+=1;
 	    if ( this.num > 10 ) {
 		console.log("auto-saving...");
-		save();
+		save(_loginfo);
 		this.num=0;
 	    }
 	};
-    })();
-    
-    restore();
-    evlis(byid("new"),'click', function(){
-	make_child('root','New Note',makeHideButton=false);
-    });
-    evlis(byid("save"),'click', function(){
-	save();
-    });
-    evlis(byid("clean"),'click', function(){
-	clean();
-    });
+    })(loginfo);
+    var body=document.body;
+    body.appendChild(evlis(
+	mkel('input',{id:"new",type:"button",value:"New"}),
+	'click', function() {
+	    make_child('root','New Note',makeHideButton=false);
+	}
+    ));
+    body.appendChild(evlis(
+	mkel('input',{id:"save",type:"button",value:"Save"}),
+	'click', function(){save(loginfo);}
+    ));
+    body.appendChild(mkdiv("root-children"));
+    if (!loginfo) setTimeout(function(){
+	notify("We we're unable to log in...<br/>"
+	      +"Data will not be saved.");
+    },100);
+    restore(loginfo);
 }
