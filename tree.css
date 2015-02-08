@@ -1,5 +1,5 @@
-@textcolor: rgb(170,170,170);
-@highlight: rgb(180,180,180);
+/*@textcolor: rgb(170,170,170);*/
+/*@highlight: rgb(180,180,180);*/
 .node {
     padding: 2px;
     position: relative;
@@ -7,84 +7,116 @@
     margin-left: 1em;
     display: block;
 }
+body{
+    background: rgb(40,40,40);
+}
+
+input[type=input], input[type=password]{
+    background: transparent;
+    border: 1px solid rgb(60,60,60);
+    margin: 2px;
+}
 
 input[type=input].textinput{
     border-top: 0px;
     border-bottom: 1px solid rgba(170,170,170,0.55);
     border-left: 0px;
     border-right: 0px;
-    width: 80%;
+    width: 200px;
+    font-size: small;
 }
 
-body, #root, input[type=input].textinput{
-    background: rgb(40,40,40);
-    color: @textcolor;
+#root{
+    minwidth: 500px;
+    padding: 20px;
+    box-shadow: 2px 2px 5px 6px #222;
+}
+
+
+body, input[type=input], input[type=password]{
+    color: rgb(170,170,170);
+    font-family: sans-serif;
 }
 
 .hidden{
     max-height: 0px;
     overflow: hidden;
-    transition: 0.5s ease-in-out;
+/*    transition: 0.3s linear;
+    -webkit-transition: 0.3s linear;*/
 }
 
 .visible{
     max-height: 4000px;
-    transition: 0.5s ease-in-out;
-
+    transition: 0.3s ease-out;
+    -webkit-transition: 0.3s ease-out;
 }
 
 .hidbutton:after, .hidbutton-show:after, .hidbutton-show:before{
     background: rgb(160,160,160)
 }
+
 .header {
     display: flex;
-    width: 40%;
-    height: 20%;
+    min-height: 15px;
     flex-direction: row;
     align-items: center;
     left: 0px;
     bottom:  0px;
-    /*width:20%;*/
+    /*width: 40%;*/
 }
-    
+
 .button{
-    display: flex;
-    width: 13px;
-    height: 13px;
-    margin-left: 0%;
-    transition: 0.5s ease-in-out;
     -moz-user-select: none;
     -khtml-user-select: none;
     -webkit-user-select: none;
     user-select: none;
+    text-align: center;
+    cursor: pointer;
+}
+
+.active-btn{
+    display: flex;
+    width: 14px;
+    height: 14px;
+    margin-left: 2px;
+    transition: 0.5s ease-in-out;
+    -webkit-transition: 0.5s ease-in-out;
 }
 
 .butbox {
     display: flex;
-    flex-direction: row;        
+    flex-direction: row;
     position: relative;
-    left: -10%;
-    top: 200%;
+    left: -20px;
+    top: -0;
     padding-left: 4px;
     padding-right: 4px;
     transition: 0.1s;
+    -webkit-transition: 0.1s;
+    z-index: 2;
 }
+
 .butbox:hover{
     transform: scale(1.6);
-    transform-origin: center center;
-    transition: 0.1s;
+    -webkit-transform: scale(1.6);
+    transform-origin: 10px center;
+    /*-webkit-transform-origin: center ;*/
+    transition: 0.1s linear;
+    -webkit-transition: 0.1s linear;
 }
 
 .butbox:hover .button{
-    border-radius: 10%;
-    margin-left: 5%;
-    margin-right: 5%;
-}
+    margin-left: 5px;
+ }
 
 .butbox:hover .button:hover{
-    transform: scale(1.4);
-    transform-origin: center center;
+
+    transform: scale(1.1);
+    -webkit-transform: scale(1.1);
+    /*transform-origin: center 50%;
+    -webkit-transform-origin: center center;*/
     transition: 0.2s ease-in-out;
+    -webkit-transition: 0.2s ease-in-out;
 }
 
 .dragbutton {
@@ -104,28 +136,28 @@ body, #root, input[type=input].textinput{
 .hidbutton:after {
     content: "";
     position: relative;
-    left: 20%;
-    top: 43%;
-    width: 56%;
-    height:15%;    
+    left: 0px;
+    top: 6px;
+    width: 13px;
+    height:2px;
 }
 
 .hidbutton-show:after{
     content: "";
     position: relative;
-    left: -17%;
-    top: 20%;
-    width: 16%;
-    height: 62%;
+    left: -1px;
+    top: 6px;
+    width: 13px;
+    height: 2px;
 }
 
 .hidbutton-show:before{
     content: "";
     position: relative;
-    left: 20%;
-    top: 46%;
-    width: 58%;
-    height:15%;
+    left: 6px;
+    top: 2px;
+    width: 2px;
+    height:10px;
 }
 
 .overtop:after {
@@ -171,10 +203,15 @@ body, #root, input[type=input].textinput{
     top:0; left: 0; right: 0; bottom:0;
     z-index: 10;
     animation-name: fadein;
+    -webkit-animation-name: fadein;
     animation-iteration-count: 1;
+    -webkit-animation-iteration-count: 1;
     animation-timing-function: ease-out;
+    -webkit-animation-timing-function: ease-out;
     animation-duration: 0.4s;
+    -webkit-animation-duration: 0.4s;
     animation-fill-mode: forwards;
+    -webkit-animation-fill-mode: forwards;
 }
 
 
@@ -195,16 +232,25 @@ body, #root, input[type=input].textinput{
     z-index: 11;
     opacity: 1.0;
 }
-.textbut{
-    background: rgb(100,100,100);
+
+.pushbtn{
+    background: rgb(70,70,70);
     border: 0px;
-    color: @textcolor;
+    border-radius: 2px;
+    color: rgb(150,150,150);
+    font-size: small;
+    margin: 2px;
+    padding: 5px 5px;
     text-decoration: none;
-    text-align: center;
-    min-width: 60px;
-    &:hover{
-	color: @highlight; 
-    }
+    min-width: 80px;
+}
+
+.pushbtn:hover{
+	color: rgb(190,190,190);
+}
+
+.pushbtn:active{
+    background: rgb(60,60,60);
 }
 
 
@@ -219,19 +265,28 @@ body, #root, input[type=input].textinput{
     justify-content: center;
 }
 
-.modal-diag.drop{
+.modal-diag.drop {
     animation-name: dropdiag;
+    -webkit-animation-name: dropdiag;
     animation-iteration-count: 1;
+    -webkit-animation-iteration-count: 1;
     animation-timing-function: ease-out;
+    -webkit-animation-timing-function: ease-out;
     animation-duration:0.5s;
+    -webkit-animation-duration:0.5s;
 }
 
-.modal-diag.away{
+.modal-diag.away {
     animation-name: updiag;
+    -webkit-animation-name: updiag;
     animation-iteration-count: 1;
+    -webkit-animation-iteration-count: 1;
     animation-timing-function: ease-out;
+    -webkit-animation-timing-function: ease-out;
     animation-duration: 0.5s;
+    -webkit-animation-duration: 0.5s;
     animation-fill-mode: forwards;
+    -webkit-animation-fill-mode: forwards;
 }
 
 /*
@@ -243,13 +298,30 @@ body, #root, input[type=input].textinput{
     100% {opacity: 0.6;}
 }
 
+@-webkit-keyframes fadein {
+      0% {opacity: 0.0;}
+    100% {opacity: 0.6;}
+}
+
+
 @keyframes dropdiag {
     0% {transform: translateY(-400px);}
     100% {transform: translateY(0);}
 }
+@-webkit-keyframes dropdiag {
+    0% {-webkit-transform: translateY(-400px);}
+    100% {-webkit-transform: translateY(0);}
+}
+
 
 @keyframes updiag{
     0% {transform: translateY(0);}
     35% {transform: translateY(10px);}
     100% {transform: translateY(-400px);}
 }
+@-webkit-keyframes updiag{
+    0% {-webkit-transform: translateY(0);}
+    35% {-webkit-transform: translateY(10px);}
+    100% {-webkit-transform: translateY(-400px);}
+}
+

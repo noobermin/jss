@@ -98,7 +98,8 @@ var saver = saver || {};
 function mkbutton(id, classes, clickf){
     var ret =
     $mkel("span",{"id":id},
-	  concat(classes,['button']),""
+	  concat(['button','active-btn'],classes),
+	  ""
     ).evlis("click",function(){saver.up();});
     if(clickf)ret.evlis("click", clickf);
     return ret.el;
@@ -119,6 +120,20 @@ function mkdiv(id, classes, inner) {
 function mkspan(id, classes, inner) {
     return mkel("span", {"id":id}, classes, inner);
 }
+function $mkspan(id, classes, inner) {
+    return $(mkspan(id,classes,inner));
+}
+
+function mkpush_button(id,classes,inner,clickf) {
+    var ret = 
+    $mkspan(
+	id,["button","pushbtn"],inner
+    ).addclass(
+	classes
+    );
+    if (clickf) ret.evlis('click',clickf);
+    return ret.el;
+}
 
 function mkoverarea(s){
     return (function (r,y)
@@ -130,7 +145,7 @@ function mkoverarea(s){
 }
 overarea = mkoverarea(4);
 
-function make_child(parentid,text,makeHideButton=true)
+function make_child(parentid,text,skipHide)
 {
     ids+=1;
     var myid=ids;
@@ -162,7 +177,6 @@ function make_child(parentid,text,makeHideButton=true)
     var drag = mkbutton(myid+"D",["dragbutton"]);
     butbox.appendChild(drag);
     drag.draggable=true;
-
     evliss(drag,
 	   "dragstart", Drag.start,
 	   "dragend", Drag.end);
@@ -171,15 +185,13 @@ function make_child(parentid,text,makeHideButton=true)
 	   "dragover", Drag.over,
 	   "dragleave",Drag.leave,
 	   "drop",     Drag.drop);
-
-    
     var parent_container = byid(parentid+"-children");
     parent_container.appendChild(child);
     //getting hide state
     var hide;
-    if (makeHideButton)
+    if (!skipHide)
 	hide = add_hide(parentid);
-    if (hide && hasclass(hide,"hidbutton-show") )
+    if (hide && hasclass(hide,"hidbutton-show"))
 	_hide(child);
     else 
 	line.focus();
@@ -187,7 +199,7 @@ function make_child(parentid,text,makeHideButton=true)
 }
 
 function add_hide(id) {
-    if ( typeof(id) == "object" )
+    if ( typeof(id) === "object" )
 	id = idof(id);
     var hide = byid(id+'-');
     if ( !hide ) {
@@ -198,7 +210,7 @@ function add_hide(id) {
 }
 
 function del_hide(id) {
-    if ( typeof(id) == "object")
+    if ( typeof(id) === "object")
 	id = idof(id);
     if (!id) return; 
     if ( kiddivs(byid(id)).length == 0)
@@ -207,13 +219,11 @@ function del_hide(id) {
 
 function _show(el,children) {
     rmclass(el,"hidbutton-show");
-    rmclass(children,"hidden");
-    addclass(children,"visible");
+    $(children).rmclass("hidden").addclass("visible");
 }
 function _hide(el,children) {
     addclass(el,"hidbutton-show");
-    rmclass(children,"visible");
-    addclass(children,"hidden");
+    $(children).rmclass("visible").addclass("hidden");
 }
 
 function hide_toggle(id) {
@@ -283,20 +293,16 @@ function restore_req(loginfo) {
 
 function restore(data) {
     
-    function restore_r(nodeid,cur,mkrm/*dirty hack*/)
-    {	
-	var child  = make_child(nodeid,cur.text,mkrm);
+    function restore_r(nodeid,cur,ignorehide/*dirty hack*/) {	
+	var child  = make_child(nodeid,cur.text,ignorehide);
 	var parent = ids;
 	map(cur.children,function(c){
-	    restore_r(parent,c,true);
+	    restore_r(parent,c);
 	});
 	return child;
     }
-    console.log(data);
-    var d=JSON.parse(data);
-    console.log(d);
-    d.map(function(c) {
-	var child=restore_r("root",c,false);
+    JSON.parse(data).map(function(c) {
+	var child=restore_r("root",c,true);
 	hide_toggle(idof(child));
     });
     
@@ -320,19 +326,25 @@ function login() {
     var body=document.body;
     var login = mkdiv("login",['modal-diag','drop']);
     login.innerHTML =
-    '<form method="post" action="/login" id="loginform"\
-      onsubmit="checklogin(this); return false;">\
+    '<form method="post" action="/login" id="loginform">\
       <div>\
        <label for="username">Username:</label><input type="input" name="username" id="username"/>\
       </div>\
       <div>\
        <label for="password">Password:</label><input type="password" name="password" id="password"/>\
       </div>\
-      <div>\
-       <button type="submit" class="textbut">Submit</button>\
+      <div id="subbox">\
       </div>\
-     </form>'; 
+     </form>';
+    function submit(){checklogin(byid("loginform"));return false;}
     body.appendChild(login);
+    //haxxorz
+    byid('subbox').appendChild(
+	mkpush_button("submit",[],'Submit',submit)
+    );
+    $(byid('loginform')).evlis('keydown',function(e){
+	if (e.keyCode === 13) submit();
+    });
 }
 
 function checklogin(form) {
@@ -351,7 +363,6 @@ function checklogin(form) {
 	    }
 	    var lg = byid('login');
 	    $(lg).rmclass("drop").addclass("away");
-	    console.log(lg.classList);
 	    window.setTimeout(function(){
 		initapp(loginfo);
 	    },1000);
@@ -379,22 +390,16 @@ function notify(message){
     );
     bg.appendChild(diag);
     diag.appendChild(
-	$(mkspan("modal-button",["textbut"],"ok")).evlis(
-	    "click",
-	    function(){
-		$(diag).rmclass(
-		    "drop"
-		).addclass(
-		    "away"
-		);
-		setTimeout(function(){
-		    document.body.removeChild(bg);
-		},500);
-	    }
-	).el);
+	mkpush_button("modal-button", [], "ok", function(){
+	    $(diag).rmclass("drop").addclass("away");
+	    setTimeout(function(){
+		document.body.removeChild(bg);
+	    },500);
+	})
+    );
 }
 
-function initapp(loginfo) {
+function initapp(loginfo,supressNotify) {
     strip();
     saver = new (function(_loginfo){
 	this.num=0;
@@ -407,19 +412,31 @@ function initapp(loginfo) {
 	    }
 	};
     })(loginfo);
-    var body=document.body;
-    body.appendChild(evlis(
-	mkel('input',{id:"new",type:"button",value:"New"}),
-	'click', function() {
-	    make_child('root','New Note',makeHideButton=false);
+    var root=mkdiv("root");
+    document.body.appendChild(root);
+    var header = mkdiv("root-header");
+    root.appendChild(header);
+    header.appendChild(
+	mkpush_button("new", [], "New", function(){
+	    make_child('root','New Note',true);
+	})
+    );
+    header.appendChild(
+	mkpush_button("save", [], "Save",
+		      function(){save(loginfo);}
+	)
+    );
+    root.appendChild(mkdiv("root-children"));
+        
+    evlis(window,'keydown',function(e){
+	console.log("hi+%i",e.ctrlKey);
+	if (e.crtlKey && e.keyCode===83) {
+	    e.preventDefault();
+	    console.log("save attempt");
+	    return false;
 	}
-    ));
-    body.appendChild(evlis(
-	mkel('input',{id:"save",type:"button",value:"Save"}),
-	'click', function(){save(loginfo);}
-    ));
-    body.appendChild(mkdiv("root-children"));
-    if (!loginfo) setTimeout(function(){
+    },false);
+    if (!loginfo && !suppressNotify) setTimeout(function(){
 	notify("We we're unable to log in...<br/>"
 	      +"Data will not be saved.");
     },100);

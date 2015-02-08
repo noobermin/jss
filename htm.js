@@ -36,16 +36,24 @@ function mkel(type, attr, classes, val) {
     if (val)ret.innerHTML = val;
     return ret;
 }
+
 function $mkel(a,b,c,d){return $(mkel(a,b,c,d));}
 
 function rmclass(el) {
-    el.classList.remove.apply(el.classList,
-			      slice(arguments,1,arguments.length));
+    if (Array.isArray(arguments[1]))
+	el.classList.remove.apply(el.classList,arguments[1]);
+    else
+	el.classList.remove.apply(el.classList,
+				  slice(arguments,1,arguments.length));
     return el;
 }
 function addclass(el) {
-    el.classList.add.apply(el.classList,
-			   slice(arguments,1,arguments.length));
+    if (Array.isArray(arguments[1])) {
+	el.classList.add.apply(el.classList,arguments[1]);
+    } else {
+	el.classList.add.apply(el.classList,
+			       slice(arguments, 1, arguments.length));
+    }
     return el;
 }
 function hasclass(el){
@@ -54,6 +62,7 @@ function hasclass(el){
 }
 function evlis(el,type,f,pass) {
     (!pass || pass != false) && (pass = true);
+    console.log(pass);
     el.addEventListener(type,f,pass);
     return el;
 }
@@ -78,11 +87,11 @@ _$.prototype.evlis = function(type,f,pass) {
     return this;
 };
 _$.prototype.addclass = function() {
-    this.el.classList.add.apply(this.el.classList,arguments);
+    addclass.apply(addclass, concat([this.el],slice(arguments)));
     return this;
 };
 _$.prototype.rmclass = function() {
-    this.el.classList.remove.apply(this.el.classList,arguments);
+    rmclass.apply(rmclass, concat([this.el],slice(arguments)));
     return this;
 };
 _$.prototype.hasclass = function() {

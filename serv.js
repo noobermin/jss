@@ -79,7 +79,8 @@ function mkpostreader(handler,passResponse,nonPostErr){
 
 var users = {
     "yidie"     : ["pancakes",1],
-    "noobermin" : ["1234",2]
+    "noobermin" : ["1234",2],
+    "test"      : ["test",3]
 };
 
 function check_login(username, password) {
@@ -95,6 +96,7 @@ var site = {
     '/htm.js':    mkfileread("text/plain"),
     '/cookies.js':mkfileread("text/plain"),
     '/tree.css':  mkfileread("text/css"),
+    '/test.html':  mkfileread("text/html"),
     '/login' : mkpostreader(function(data,req,res){
 	var d = querystring.parse(data);
 	if( check_login(d.username,d.password) ) {
@@ -130,6 +132,10 @@ var site = {
 	    res.writeHead(403, {'Content-Type': 'text/plain'});
 	    res.end('bad login');
 	    return;
+	} else if (ui==3) { //test account
+	    res.writeHead(200, {'Content-Type': 'text/plain'});
+	    res.end('good login');
+	    return;
 	}
 	data  = decodeURI(d.data);
 	console.log("recieved:");
@@ -147,5 +153,5 @@ var site = {
 };
 
 
-http.createServer(mkrouter(site)).listen(8080);    
+http.createServer(mkrouter(site)).listen(8080);
 
