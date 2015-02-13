@@ -96,10 +96,12 @@ var site = {
     '/htm.js':    mkfileread("text/plain"),
     '/cookies.js':mkfileread("text/plain"),
     '/tree.css':  mkfileread("text/css"),
+    '/shapes.css':  mkfileread("text/css"),
     '/test.html':  mkfileread("text/html"),
     '/login' : mkpostreader(function(data,req,res){
 	var d = querystring.parse(data);
 	if( check_login(d.username,d.password) ) {
+	    //check if file exists.
 	    console.log("good");
 	    res.writeHead(200, {'Content-Type': 'text/plain'});
 	    res.end('good login');
@@ -138,12 +140,26 @@ var site = {
 	    return;
 	}
 	data  = decodeURI(d.data);
-	console.log("recieved:");
-	console.log(data);
-	fs.writeFile(userfile(ui),data,function(err) {
-	    if(err) throw err;
-	    res.writeHead(200, {'Content-Type': 'text/plain'});
-	    res.end('good login');
+	console.log("recieved:",data);
+	fs.open(userfile(ui),'w',function(err,fd) {
+	    if(err) {
+		if (err.code ==="ENOENT" && !fs.existsSync("./forest")) {
+		    console.log("need to mkdir");
+		}
+		res.writeHead(301, {'Content-Type': 'text/plain'});
+		res.end('Internal Error');
+		return false;
+	    }
+	    fs.write(fd, data,0,'utf-8', function(err){
+		if (err) {
+		    res.writeHead(301, {'Content-Type': 'text/plain'});
+		    res.end('Error writing file.');
+		    console.log("Error writing file.");
+		} else {
+		    res.writeHead(200, {'Content-Type': 'text/plain'});
+		    res.end('good login');
+		}
+	    });
 	});
     },true),
     '/test' : function(req,res) {

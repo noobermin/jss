@@ -95,15 +95,17 @@ Drag.end = function(e) {
 //saver
 var saver = saver || {};
     
-function mkbutton(id, classes, clickf){
+function $mkbutton(id, hclass, clickf) {
     var ret =
-    $mkel("span",{"id":id},
-	  concat(['button','active-btn'],classes),
+    $mkel("div",{"id":id},
+	  concat(['button','active-btn'],hclass),
 	  ""
     ).evlis("click",function(){saver.up();});
     if(clickf)ret.evlis("click", clickf);
-    return ret.el;
+    return ret;
 }
+function mkbutton(id, classes, clickf){
+    return $mkbutton(id,classes,clickf).el;}
 
 function mkinput(id, classes, val, inputf) {
     var ret =
@@ -114,19 +116,19 @@ function mkinput(id, classes, val, inputf) {
     if (inputf) ret.evlis("input", inputf);
     return ret.el;
 }
-function mkdiv(id, classes, inner) {
-    return mkel("div", {"id":id}, classes, inner);
+function $mkdiv(id, classes, inner) {
+    return $mkel("div", {"id":id}, classes, inner);
 }
+function mkdiv(id,classes,inner) { return $mkdiv(id,classes,inner).el; }
+
 function mkspan(id, classes, inner) {
     return mkel("span", {"id":id}, classes, inner);
 }
 function $mkspan(id, classes, inner) {
     return $(mkspan(id,classes,inner));
 }
-
 function mkpush_button(id,classes,inner,clickf) {
-    var ret = 
-    $mkspan(
+    var ret = $mkspan(
 	id,["button","pushbtn"],inner
     ).addclass(
 	classes
@@ -135,6 +137,9 @@ function mkpush_button(id,classes,inner,clickf) {
     return ret.el;
 }
 
+
+
+/*garbajj*/
 function mkoverarea(s){
     return (function (r,y)
 	    { var w = (r.bottom - r.top)/s
@@ -149,44 +154,50 @@ function make_child(parentid,text,skipHide)
 {
     ids+=1;
     var myid=ids;
-    var child = mkdiv(myid,["node"]);
-    var header = mkdiv(myid+"-header",["header"]);
-    var grandkids = mkdiv(myid+"-children");
-    child.appendChild(header);
-    child.appendChild(grandkids);
-    
-    var line = mkinput(myid+"-input",["textinput"],text);
-    header.appendChild(line);
-
-    var butbox = mkdiv(myid+"-butts",["butbox"]);
-    header.appendChild(butbox);
-    
-    //add button
-    butbox.appendChild(
-	mkbutton(myid+"+",["addbutton"],
-		 function(){make_child(myid,'New Note');})
-    );
-    //del button
-    butbox.appendChild(
-	mkbutton(myid+"x",["delbutton"],
-		 function(){del(myid);})
-    );
-
-    //setting up drag and drop
-    //drag button
-    var drag = mkbutton(myid+"D",["dragbutton"]);
-    butbox.appendChild(drag);
-    drag.draggable=true;
-    evliss(drag,
-	   "dragstart", Drag.start,
-	   "dragend", Drag.end);
-    
-    evliss(header,
-	   "dragover", Drag.over,
-	   "dragleave",Drag.leave,
-	   "drop",     Drag.drop);
-    var parent_container = byid(parentid+"-children");
-    parent_container.appendChild(child);
+    var child =
+    $mkdiv(myid,"node").append(
+	/*header*/
+	$mkdiv(
+	    myid+"-header","header"
+	).append(
+	    mkinput(myid+"-input","textinput",text)
+	).evliss(
+	    "dragover", Drag.over,
+	    "dragleave",Drag.leave,
+	    "drop",     Drag.drop
+	).append(
+	    $mkdiv(
+		myid+"-butts","butbox"
+	    ).append(
+		//add button
+		$mkbutton(myid+"+", "addbutton", function(){make_child(myid,'New Note');}
+		).append(
+		    mkdiv(myid+"+_1","add1"),mkdiv(myid+"+_2","add2")
+		).el
+	    ).append(
+		//rm button
+		$mkbutton(myid+"x", "delbutton", function(){del(myid);}
+		).append(
+		    mkdiv(myid+"+_1","rm1"),mkdiv(myid+"+_2","rm2")
+		).el
+	    ).append(
+		$mkbutton(
+		    myid+"D","dragbutton"
+		).attr(
+		    "draggable","true"
+		).evliss(
+		    "dragstart", Drag.start,
+		    "dragend", Drag.end
+		).el
+	    ).el
+	).el,
+	/*children*/
+	$mkdiv(
+	    myid+"-children"
+	).el
+	/*active buttons*/
+    ).el;
+    $byid(parentid+"-children").append(child);
     //getting hide state
     var hide;
     if (!skipHide)
@@ -194,8 +205,12 @@ function make_child(parentid,text,skipHide)
     if (hide && hasclass(hide,"hidbutton-show"))
 	_hide(child);
     else 
-	line.focus();
+	focus(myid);
     return child;
+}
+
+function focus(id){
+    byid(id+"-input").focus();
 }
 
 function add_hide(id) {
@@ -203,7 +218,11 @@ function add_hide(id) {
 	id = idof(id);
     var hide = byid(id+'-');
     if ( !hide ) {
-	hide = mkbutton(id+"-",["hidbutton"],function(){hide_toggle(id);});
+	hide = $mkbutton(
+	    id+"-","hidbutton",function(){hide_toggle(id);}
+	).append(
+	    mkdiv(id+"-"+"_1","hid1"),mkdiv(id+"-"+"_2","hid2")
+	).el;								    
 	byid(id+'-header').insertBefore(hide, byid(id+'-input'));
     }
     return hide;
@@ -429,7 +448,6 @@ function initapp(loginfo,supressNotify) {
     root.appendChild(mkdiv("root-children"));
         
     evlis(window,'keydown',function(e){
-	console.log("hi+%i",e.ctrlKey);
 	if (e.crtlKey && e.keyCode===83) {
 	    e.preventDefault();
 	    console.log("save attempt");

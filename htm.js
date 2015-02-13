@@ -32,13 +32,20 @@ function mkel(type, attr, classes, val) {
     if (attr) for (prop in attr)
 	ret[prop] = attr[prop];
     if (classes)
-	map(classes, function(c){return addclass(ret,c);})
+	addclass(ret,classes);
     if (val)ret.innerHTML = val;
     return ret;
 }
 
 function $mkel(a,b,c,d){return $(mkel(a,b,c,d));}
 
+function append(el) {
+    var list;
+    if (Array.isArray(arguments[1])) list = arguments[1];
+    else list = slice(arguments,1,arguments.length);
+    map(list, function(c){el.appendChild(c)});
+    return el;
+}
 function rmclass(el) {
     if (Array.isArray(arguments[1]))
 	el.classList.remove.apply(el.classList,arguments[1]);
@@ -62,7 +69,6 @@ function hasclass(el){
 }
 function evlis(el,type,f,pass) {
     (!pass || pass != false) && (pass = true);
-    console.log(pass);
     el.addEventListener(type,f,pass);
     return el;
 }
@@ -72,6 +78,7 @@ function evliss() {
     return arguments[0];
 }
 
+
 //insertion convienience
 function insert_after(el, before) {
     before.parentElement.insertBefore(el,before.nextSibling);
@@ -80,10 +87,20 @@ function insert_after(el, before) {
 function insert_before(el, after) {
     after.parentElement.insertBefore(el,after);
 }
-
+//pruner
+function prune(el) {
+    while (el.hasChildNodes()) el.removeChild(el.lastChild);
+    return el;
+}
+//there has to be a better way to organize this.
 
 _$.prototype.evlis = function(type,f,pass) {
     evlis(this.el, type, f, pass);
+    return this;
+};
+_$.prototype.evliss = function() {
+    for(var i=0; i< arguments.length; i+=2)
+	evlis(this.el, arguments[i], arguments[i+1], false);
     return this;
 };
 _$.prototype.addclass = function() {
@@ -97,8 +114,21 @@ _$.prototype.rmclass = function() {
 _$.prototype.hasclass = function() {
     return this.el.classList.contains.apply(this.el.classList,
 					    arguments);
-}
-_$.prototype.id = function() { return idof(this.el); }
+};
+_$.prototype.id = function() { return idof(this.el); };
+_$.prototype.prune = function() { prune(this.el); return this;};
+
+_$.prototype.append = function () {
+    append.apply(append,concat([this.el],slice(arguments)));
+    return this;
+};
+_$.prototype.attr  = function () {
+    if( arguments.length == 1) return this.el[arguments[0]];
+    else for(var i=0; i< arguments.length; i+=2)
+	this.el[arguments[i]]=arguments[i+1];
+    return this;
+};
+
 
 //xmlhttprequest
 function mkxhr(){
