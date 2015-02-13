@@ -23,7 +23,7 @@ input[type=input].textinput{
     border-left: 0px;
     border-right: 0px;
     width: 200px;
-    font-size: small;
+    font-size: medium;
 }
 
 #root{
@@ -76,8 +76,8 @@ body, input[type=input], input[type=password]{
 
 .active-btn{
     display: flex;
-    width: 14px;
-    height: 14px;
+    width: 18px;
+    height: 18px;
     /*margin-left: 2px;*/
     transition: 0.5s ease-in-out;
     -webkit-transition: 0.5s ease-in-out;
@@ -127,7 +127,7 @@ body, input[type=input], input[type=password]{
     top: 39.5%;
     left: 10%;
     width: 80%;
-    height: 19%;
+    height: 20%;
     z-index:1;
 }
 .butbox:hover .addbutton .add2{
@@ -136,7 +136,7 @@ body, input[type=input], input[type=password]{
     top: 39.5%;
     left: 10%;
     width: 80%;
-    height: 19%;
+    height: 20%;
     z-index:2;
     transform: rotate(-90deg);
 }
@@ -153,7 +153,7 @@ body, input[type=input], input[type=password]{
     top: 39.5%;
     left: 6%;
     width: 90%;
-    height: 19%;
+    height: 20%;
     transform: rotate(45deg);
     z-index:1;
 }
@@ -163,7 +163,7 @@ body, input[type=input], input[type=password]{
     top: 39.5%;
     left: 6%;
     width: 90%;
-    height: 19%;
+    height: 20%;
     z-index:2;
     transform: rotate(-45deg);
 }
@@ -180,7 +180,7 @@ body, input[type=input], input[type=password]{
     top: 39.5%;
     left: 10%;
     width: 80%;
-    height: 19%;
+    height: 20%;
     z-index:2;
 }
 
@@ -196,7 +196,7 @@ body, input[type=input], input[type=password]{
     top: 39.5%;
     left: 10%;
     width: 80%;
-    height: 19%;
+    height: 20%;
     z-index:2;
     transform: rotate(-90deg);
 }
@@ -210,7 +210,7 @@ body, input[type=input], input[type=password]{
     position: absolute;
     background: rgb(150,150,150);
     width: 30px;
-    height: 1px;
+    height: 2px;
     top: 0px;
     left: 5px;
     width: 25px;
@@ -221,7 +221,7 @@ body, input[type=input], input[type=password]{
     position: absolute;
     background: rgb(150,150,150);
     width:30px;
-    height: 1px;
+    height: 2px;
     bottom: 0px;
     left: 5px;
     width: 25px;
@@ -231,7 +231,7 @@ body, input[type=input], input[type=password]{
     content: "";
     position: absolute;
     background: rgb(150,150,150);
-    width: 1px;
+    width: 2px;
     height: 14px;
     left: 0px;
     top: 7px;
@@ -283,7 +283,7 @@ body, input[type=input], input[type=password]{
     border: 0px;
     border-radius: 2px;
     color: rgb(150,150,150);
-    font-size: small;
+    font-size: medium;
     margin: 2px;
     padding: 5px 5px;
     text-decoration: none;
