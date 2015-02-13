@@ -418,7 +418,7 @@ function notify(message){
     );
 }
 
-function initapp(loginfo,supressNotify) {
+function initapp(loginfo,suppressNotify) {
     strip();
     saver = new (function(_loginfo){
 	this.num=0;
