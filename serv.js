@@ -1,8 +1,8 @@
 var http = require('http'),
     url = require('url'),
     querystring = require('querystring'),
-    htm = require('./jss/htm'),
     fs = require('fs'),
+    htm = require('./jss/htm'),
     nde = require('./jss/nde');
 
 //aliases
