@@ -76,3 +76,9 @@ function mkpostreader(handler,passResponse,nonPostErr){
 	}
     };
 }
+
+
+exports.mkfileread = mkfileread;
+exports.mkpostreader = mkpostreader;
+exports.mkrouter = mkrouter;
+
