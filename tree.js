@@ -50,11 +50,11 @@ Drag.over = function(e){
     var i = overarea(e.target.getBoundingClientRect(),e.clientY);
     rmclass(e.target,"overtop","overmid","overbot");
     if (i==-1)
-	addclass(e.target,"overbot");
+	insert_after(drag.src,e.target);
     else if (i==0)
-	addclass(e.target,"overmid");
+	console.log("nothing");//insert_after(drag.src,e.target);
     else
-	addclass(e.target,"overtop");
+	insert_before(drag.src,e.target);
 };
 Drag.leave = function(e){
     if (drag == null)
