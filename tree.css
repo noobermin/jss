@@ -370,3 +370,12 @@ body, input[type=input], input[type=password]{
     100% {-webkit-transform: translateY(-400px);}
 }
 
+.shift-down{
+    transform: translateY(15px);
+    transition: 0.2s ease-in;
+}
+
+.move-right{
+    transform: translateX(10px);
+    transition: 0.2 ease-in;
+}
