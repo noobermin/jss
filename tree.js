@@ -22,7 +22,7 @@ var Drag = function(src) {
     //set all the bad ids
     this.bad_ids= map(allkids(src),idof);
     //letting my old C-ness shine through
-    for(var cur=src;
+    for(var cur=src.parentElement.parentElement;
 	idof(cur) !== "root";
 	cur=cur.parentElement.parentElement)
 	this.bad_ids.push(idof(cur));
@@ -30,7 +30,6 @@ var Drag = function(src) {
     this.parent = src.parentElement.parentElement;
     //over state information
     this.overstate = "none";
-
 };
 Drag.prototype.valid_target = function (obj) {
     return !has(this.bad_ids, idof(obj));
@@ -53,28 +52,30 @@ Drag.prototype._shift = function(el,inclusive) {
 	parent = parent.parentElement;
 	return concat(getunder(parent),under);
     }
-    var under = getunder(target);
+    console.log(idof(el));
+    var under = getunder(el);
     if (inclusive)
 	under.push(el);
     under.map(function(c){
 	addclass(c,"shift-down");
     });
-    this.overstate = "shift-"+idof(el);
+    this.overstate = "shift";
     this.current_over = idof(el);
     this.shifted = under;
     this.before  = inclusive;
 }
-Drag.prototype.shift = function(el,inclusive) {
+Drag.prototype.over_shift = function(el,inclusive) {
     var id=idof(el);
     if (this.overstate === "shift"
 	&& (this.current_over === id || id === "root"))
 	return;
-    this.cleanup();
+    this.over_cleanup();
     this._shift(el,inclusive);
 }
 Drag.prototype._insert = function(el) {
-    addclass(target, "move-right");
-    this.over_cleanup();
+    addclass(el, "move-right");
+    this.overstate = "insert";
+    this.current_over = idof(el);
 }
 Drag.prototype.over_insert = function(el) {
     var id=idof(el);
@@ -82,20 +83,24 @@ Drag.prototype.over_insert = function(el) {
 	&& (this.current_over === id || id === "root"))
 	return;
     this.over_cleanup();
-    this._insert();
+    this._insert(el);
 }
 Drag.prototype.over_cleanup = function() {
-    this.current_over = null;
     if (this.overstate === "shift") {
 	this.shifted.map(function(c){
-	    rmclass(c,"shift-down");
+	    $(c).rmclass("shift-down").addclass("shift-back-up");
+	    setTimeout(function(){rmclass(c,"shift-back-up");},200);
 	});
 	delete this.shifted;
 	delete this.before;
     } else if (this.overstate === "insert") {
-	//nothing so far
-    } else {console.log("whut");}
+	var cur = $byid(this.current_over);
+	cur.rmclass("move-right");//.addclass("move-back-left");
+	//cur = cur.el;
+	//setTimeout(function(){rmclass(cur,"move-back-left");},200);
+    }
     this.overstate = "none";
+    this.current_over = null;
 }
 
 //drag-and-drop callbacks
@@ -108,7 +113,8 @@ function dndstart(e){
     drag = new Drag(src);
 }
 
-function overarea(rect,y){
+function overarea(target,y){
+    var rect = byid(idof(target)+"-header").getBoundingClientRect();
     var width = (rect.bottom - rect.top)/4;
     if (y > rect.bottom-width)   return -1;
     else if (y < rect.top+width) return  1;
@@ -121,7 +127,6 @@ function dnddrop(e){
     if (drag.overstate === "none")
 	return true;
     e.stopPropagation && e.stopPropagation();
-
     if (drag.overstate === "insert") {
 	var dest = $byid(
 	    drag.current_over
@@ -133,7 +138,7 @@ function dnddrop(e){
 	if (hide && hasclass(drag.src, "hidbutton-show"))
 	    _hide(drag.src);
     } else if (drag.overstate === "shift") {
-	if (this.before) {
+	if (drag.before) {
 	    insert_before(drag.src, $byid(drag.current_over));
 	} else {
 	    insert_after(drag.src, $byid(drag.current_over));
@@ -156,12 +161,15 @@ function dndover(e){
     
     e.preventDefault && e.preventDefault();
     e.dataTransfer.dropEffect = "move";
-    
+    if(idof(target) == idof(drag.src)) {
+	drag.over_cleanup();
+	return false;
+    }
     //finding whats covered
-    var i = overarea(target.getBoundingClientRect(),e.clientY);
+    var i = overarea(target,e.clientY);
     if (i==0) {//over the middle, attempt insertion.
 	drag.over_insert(target);
-    } else if (i==1) {
+    } else if (i==1) { // before
 	drag.over_shift(target, true);
     } else {
 	drag.over_shift(target);
@@ -505,9 +513,9 @@ function initapp(loginfo,suppressNotify) {
 	    ).append(
 		mkpush_button("save", [], "Save",
 			      function(){save(loginfo);})
-	    ).append(
-		mkdiv("root-children")
 	    )
+	).append(
+	    mkdiv("root-children")
 	).evliss(
 	    "dragover", dndover,
 	    "drop",     dnddrop

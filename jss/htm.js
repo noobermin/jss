@@ -107,7 +107,7 @@ function prune(el) {
 }
 //there has to be a better way to organize this.
 _$.prototype.__iama_$ = true;
-function isd(el) { return el.__iama_$; }
+function is$(el) { return el.__iama_$; }
 
 _$.prototype.evlis = function(type,f,pass) {
     evlis(this.el, type, f, pass);

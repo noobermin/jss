@@ -374,8 +374,17 @@ body, input[type=input], input[type=password]{
     transform: translateY(15px);
     transition: 0.2s ease-in;
 }
+.shift-back-up{
+    transform: translateY(0px);
+    transition: 0.2s ease-in;
+}
+
 
 .move-right{
     transform: translateX(10px);
     transition: 0.2 ease-in;
+}
+.move-back-left{
+    transform: translateX(0px);
+    transition: 0.2s ease-in;
 }
