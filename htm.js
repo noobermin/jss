@@ -14,6 +14,12 @@ slice = mkarraycall("slice");
 function has(arraylike,ino){return filter(arraylike,function(c){return c == ino}).length > 0;}
 function last(arraylike){ return arraylike[arraylike.length-1]; }
 function setlast(arraylike,d){ arraylike[arraylike.length-1]=d; }
+function findfirst(arraylike, val) {
+    var arr = slice(arraylike);
+    for(var i=0; i < arr.length; ++i)
+	if (arr[i] == val) return i;
+    return -1;
+}
 
 //aliases
 function byid(id){return document.getElementById(id);}
@@ -43,7 +49,11 @@ function append(el) {
     var list;
     if (Array.isArray(arguments[1])) list = arguments[1];
     else list = slice(arguments,1,arguments.length);
-    map(list, function(c){el.appendChild(c)});
+    list.map(
+	function(c){return is$(c) ?  c.el : c;}
+    ).map(
+	function(c){el.appendChild(c);}
+    );
     return el;
 }
 function rmclass(el) {
@@ -78,13 +88,16 @@ function evliss() {
     return arguments[0];
 }
 
-
 //insertion convienience
 function insert_after(el, before) {
+    is$(el)     && (el = el.el);
+    is$(before) && (before = before.el);
     before.parentElement.insertBefore(el,before.nextSibling);
 }
 
 function insert_before(el, after) {
+    is$(el)     && (el = el.el);
+    is$(after) && (after = after.el);
     after.parentElement.insertBefore(el,after);
 }
 //pruner
@@ -93,6 +106,8 @@ function prune(el) {
     return el;
 }
 //there has to be a better way to organize this.
+_$.prototype.__iama_$ = true;
+function isd(el) { return el.__iama_$; }
 
 _$.prototype.evlis = function(type,f,pass) {
     evlis(this.el, type, f, pass);
@@ -128,6 +143,10 @@ _$.prototype.attr  = function () {
 	this.el[arguments[i]]=arguments[i+1];
     return this;
 };
+_$.prototype.insert_before = function(el) {
+    insert_before(this.el, before);
+    return this;
+}
 
 
 //xmlhttprequest
