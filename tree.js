@@ -1,14 +1,18 @@
 var ids=0;
 //traversing child nodes, avoiding headers...
-function kiddivs(parent){return slice(parent.childNodes[1].childNodes);}
+function getkids(parent){
+    return slice($toel(parent).childNodes[1].childNodes);
+}
 //this isn't very elegant imo...
 function allkids(parent){
-    var kids = kiddivs(parent);
+    var kids = getkids(parent);
     if (!kids.length) return [];
     //don't ask
     return concat.apply(concat,concat([kids], map(kids,allkids)));
 }
-function maptodivs(parent,f){return kiddivs(parent).map(f);}
+function maptodivs(parent,f){return getkids(parent).map(f);}
+//herpaderp
+function return_false(){return false;}
 
 //get the node for the given element
 function nodefor(el) {
@@ -16,7 +20,7 @@ function nodefor(el) {
 }
 //drag-and-drop shit
 
-var drag=null;
+var drag = null;
 var Drag = function(src) {
     this.src=src;
     //set all the bad ids
@@ -52,7 +56,6 @@ Drag.prototype._shift = function(el,inclusive) {
 	parent = parent.parentElement;
 	return concat(getunder(parent),under);
     }
-    console.log(idof(el));
     var under = getunder(el);
     if (inclusive)
 	under.push(el);
@@ -95,9 +98,9 @@ Drag.prototype.over_cleanup = function() {
 	delete this.before;
     } else if (this.overstate === "insert") {
 	var cur = $byid(this.current_over);
-	cur.rmclass("move-right");//.addclass("move-back-left");
-	//cur = cur.el;
-	//setTimeout(function(){rmclass(cur,"move-back-left");},200);
+	cur.rmclass("move-right").addclass("move-back-left");
+	cur = cur.el;
+	setTimeout(function(){rmclass(cur,"move-back-left");},200);
     }
     this.overstate = "none";
     this.current_over = null;
@@ -106,50 +109,28 @@ Drag.prototype.over_cleanup = function() {
 //drag-and-drop callbacks
 function dndstart(e){
     var src = nodefor(e.target);
-    console.log(src);
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData('text/html','blarg');
     e.dataTransfer.setDragImage(src,0,0);
     drag = new Drag(src);
 }
 
+var area = {
+    bottom:0,top:1,insert:2,invalid:3
+}
 function overarea(target,y){
-    var rect = byid(idof(target)+"-header").getBoundingClientRect();
-    var width = (rect.bottom - rect.top)/4;
-    if (y > rect.bottom-width)   return -1;
-    else if (y < rect.top+width) return  1;
-    else                         return  0;
+    var head_rect = byid(idof(target)+"-header").getBoundingClientRect();
+    var me_rect   = target.getBoundingClientRect();
+    var width = 4;
+    if (y > me_rect.bottom-width)
+	return area.bottom;
+    else if (y < me_rect.top+width)
+	return area.top;
+    else if (y > head_rect.top+width && y < head_rect.bottom-width)
+	return area.insert;
+    else
+	return area.invalid;
 }
-
-function dnddrop(e){
-    if (drag == null)
-	return true;
-    if (drag.overstate === "none")
-	return true;
-    e.stopPropagation && e.stopPropagation();
-    if (drag.overstate === "insert") {
-	var dest = $byid(
-	    drag.current_over
-	).append(
-	    drag.src
-	);
-	//fix this on a boring day
-	var hide = add_hide(dest.el);
-	if (hide && hasclass(drag.src, "hidbutton-show"))
-	    _hide(drag.src);
-    } else if (drag.overstate === "shift") {
-	if (drag.before) {
-	    insert_before(drag.src, $byid(drag.current_over));
-	} else {
-	    insert_after(drag.src, $byid(drag.current_over));
-	}
-    } else {
-	console.log("warning: drag.overstate==%s",drag.overstate);
-    }
-    drag.finalize();
-    saver.up();
-}
-
 function dndover(e){
     if (drag == null)
 	return true; //drag not initiated by application
@@ -157,8 +138,7 @@ function dndover(e){
     //checking if valid
     var target = nodefor(e.target);
     if(!drag.valid_target(target))
-	return true;
-    
+	return false;
     e.preventDefault && e.preventDefault();
     e.dataTransfer.dropEffect = "move";
     if(idof(target) == idof(drag.src)) {
@@ -167,15 +147,38 @@ function dndover(e){
     }
     //finding whats covered
     var i = overarea(target,e.clientY);
-    if (i==0) {//over the middle, attempt insertion.
-	drag.over_insert(target);
-    } else if (i==1) { // before
-	drag.over_shift(target, true);
-    } else {
-	drag.over_shift(target);
+    switch (i) {
+	case area.insert:
+	    drag.over_insert(target);
+	    break;
+	case area.top:
+	    drag.over_shift(target, true);
+	    break;
+	case area.bottom:
+	    drag.over_shift(target);
+	    break;
     }
     return false;
 }
+
+function dnddrop(e){
+    if (drag == null)
+	return true;
+    e.stopPropagation && e.stopPropagation();
+    if (drag.overstate === "insert") {
+	insert_leaf(drag.current_over,drag.src);
+	saver.up();
+    } else if (drag.overstate === "shift") {
+	if (drag.before) {
+	    insert_before(drag.src, $byid(drag.current_over));
+	} else {
+	    insert_after(drag.src, $byid(drag.current_over));
+	}
+	saver.up();
+    } else {console.log("no overstate");}
+    drag.finalize();
+}
+
 function dndend(e) {
     drag = null;
 }
@@ -225,7 +228,6 @@ function mkpush_button(id,classes,inner,clickf) {
     return ret.el;
 }
 
-
 function make_child(parentid,text,skipHide)
 {
     ids+=1;
@@ -269,18 +271,30 @@ function make_child(parentid,text,skipHide)
 	)
 	/*active buttons*/
     ).el;
-    $byid(parentid+"-children").append(child);
-    //getting hide state
-    var hide;
-    if (!skipHide)
-	hide = add_hide(parentid);
-    if (!hide || !hasclass(hide,"hidbutton-show"))
-	focus(myid);
+    insert_leaf(byid(parentid),child,skipHide)
     return child;
+}
+
+
+function insert_leaf(parent,el,skipHide){
+    parent = $toel(parent);
+    $byid(idof(parent)+"-children").append(el);
+    /*checking if first child*/
+    if (getkids(parent).length == 1 && !skipHide) {
+	add_hide(parent);
+	console.log("success");
+    }
 }
 
 function focus(id){
     byid(id+"-input").focus();
+}
+
+function _visible(hidestate) {
+    return !hasclass(hidestate,"hidbutton-show");
+}
+function kidsvisible(el) {
+    return _visible(by(idof(el)+"-"));
 }
 
 function add_hide(id) {
@@ -292,39 +306,47 @@ function add_hide(id) {
 	    id+"-","hidbutton",function(){hide_toggle(id);}
 	).append(
 	    mkdiv(id+"-"+"_1","hid1"),mkdiv(id+"-"+"_2","hid2")
-	).el;								    
-	byid(id+'-header').insertBefore(hide, byid(id+'-input'));
+	);			    
+	insert_before(hide, byid(id+'-input'));
     }
-    return hide;
+    return hide.el;
 }
 
 function del_hide(id) {
     if ( typeof(id) === "object")
 	id = idof(id);
     if (!id) return; 
-    if ( kiddivs(byid(id)).length == 0)
+    if (getkids(byid(id)).length == 0)
 	byid(id+'-header').removeChild(byid(id+"-"));
 }
 
-function _show(el,children) {
-    rmclass(el,"hidbutton-show");
+function show_kids(id) {
+    if (typeof(id) == "object") id = idof(id);
+    var hbtn = byid(id+"-");
+    var children = byid(id+"-children");
+
+    rmclass(hbtn,"hidbutton-show");
     $(children).rmclass("hidden").addclass("visible");
 }
-function _hide(el,children) {
-    addclass(el,"hidbutton-show");
+function hide_kids(id) {
+    if (typeof(id) == "object") id = idof(id);
+    var hbtn = byid(id+"-");
+    var children = byid(id+"-children");
+
+    addclass(hbtn,"hidbutton-show");
     $(children).rmclass("visible").addclass("hidden");
 }
 
 function hide_toggle(id) {
     if (typeof(id) == "object") id = idof(id);
-    var hidebutton = byid(id+'-');
-    if (!hidebutton) return;
-    var hidden = hasclass(hidebutton,"hidbutton-show");
-    var children = byid(id+"-children");
-    //setting state
-    
-    if (hidden) _show(hidebutton,children);
-    else _hide(hidebutton,children);
+    var hbtn = byid(id+"-");
+    if (_visible(hbtn)) {
+	hide_kids(byid(id));
+	$(hbtn).addclass("hidbutton-show");
+    } else {
+	show_kids(byid(id));
+	$(hbtn).rmclass("hidbutton-show");
+    }
 }
 
 
@@ -336,11 +358,6 @@ function save(loginfo) {
 	};
     }
     console.log("saving...");
-    // map(byid('root-children').children,
-    // 	save_r
-    // ).map(function(c,i){
-    // 	docCookies.setItem('tree'+i,JSON.stringify(c),Infinity);
-    // });
     
     var data = map(byid('root-children').children, save_r);
     var xhr = mkxhr();
@@ -392,17 +409,11 @@ function restore(data) {
     }
     JSON.parse(data).map(function(c) {
 	var child=restore_r("root",c,true);
-	hide_toggle(idof(child));
     });
-    
-    /*for(var i=0;docCookies.hasItem('tree'+i);++i) {
-	var child=restore_r(
-	    "root",
-	    JSON.parse(docCookies.getItem('tree'+i)),
-	    false
-	);
-	hide_toggle(idof(child));
-    }*/
+    getkids(byid("root")).map(function(c) {
+	if (getkids(c).length != 0)
+	    hide_kids(c);
+    });
 }
 
 function clean(){ docCookies.removeItem('tree');}
@@ -515,10 +526,15 @@ function initapp(loginfo,suppressNotify) {
 			      function(){save(loginfo);})
 	    )
 	).append(
-	    mkdiv("root-children")
+	    $mkdiv(
+		"root-children"
+	    ).evliss(
+		"dragenter", return_false
+	    )
 	).evliss(
-	    "dragover", dndover,
-	    "drop",     dnddrop
+	    "dragover",  dndover,
+	    "dragenter", return_false,
+	    "drop",      dnddrop
 	);
 	return ret.el;
     })();

@@ -97,8 +97,8 @@ body, input[type=input], input[type=password]{
 .butbox:hover{
     transform: scale(1.6);
     -webkit-transform: scale(1.6);
-    transform-origin: 10px center;
-    -webkit-transform-origin: 10px center;
+    transform-origin: 50px center;
+    -webkit-transform-origin: 50px center;
     transition: 0.1s linear;
     -webkit-transition: 0.1s linear;
 }
@@ -370,6 +370,9 @@ body, input[type=input], input[type=password]{
     100% {-webkit-transform: translateY(-400px);}
 }
 
+/*
+ * Shifting due to inserting and reordering
+ */
 .shift-down{
     transform: translateY(15px);
     transition: 0.2s ease-in;
