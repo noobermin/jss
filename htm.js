@@ -25,14 +25,7 @@ function findfirst(arraylike, val) {
 function byid(id){return document.getElementById(id);}
 function idof(el){return el.id;}
 
-//dom stuff
-function _$(el){
-    this.el = el;
-}
-function $(el) {return new _$(el);} 
-
-function $byid(id) { return new _$(byid(id));}
-
+//DOM stuff
 function mkel(type, attr, classes, val) {
     var ret = document.createElement(type);
     if (attr) for (prop in attr)
@@ -42,8 +35,6 @@ function mkel(type, attr, classes, val) {
     if (val)ret.innerHTML = val;
     return ret;
 }
-
-function $mkel(a,b,c,d){return $(mkel(a,b,c,d));}
 
 function append(el) {
     var list;
@@ -105,10 +96,12 @@ function prune(el) {
     while (el.hasChildNodes()) el.removeChild(el.lastChild);
     return el;
 }
-//there has to be a better way to organize this.
-_$.prototype.__iama_$ = true;
-function isd(el) { return el.__iama_$; }
 
+//my super type
+function _$(el){
+    this.el = el;
+}
+_$.prototype.__iama_$ = true;
 _$.prototype.evlis = function(type,f,pass) {
     evlis(this.el, type, f, pass);
     return this;
@@ -147,6 +140,14 @@ _$.prototype.insert_before = function(el) {
     insert_before(this.el, before);
     return this;
 }
+//other goodies
+function is$(el) { return el.__iama_$; }
+
+//creation functions
+function $(el) {  return !is$(el) ? new _$(el) : el; }
+function $toel(el) { return is$(el) ? el.el : el; }
+function $byid(id) { return new _$(byid(id));}
+function $mkel(a,b,c,d){return $(mkel(a,b,c,d));}
 
 
 //xmlhttprequest
