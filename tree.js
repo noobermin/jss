@@ -166,7 +166,7 @@ function dnddrop(e){
 	return true;
     e.stopPropagation && e.stopPropagation();
     if (drag.overstate === "insert") {
-	insert_leaf(drag.current_over,drag.src);
+	insert_leaf($byid(drag.current_over), drag.src);
 	saver.up();
     } else if (drag.overstate === "shift") {
 	if (drag.before) {
