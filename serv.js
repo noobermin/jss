@@ -67,11 +67,11 @@ var site = {
 	    res.writeHead(403, {'Content-Type': 'text/plain'});
 	    res.end('bad login');
 	    return;
-	} else if (ui==3) { //test account
-	    res.writeHead(200, {'Content-Type': 'text/plain'});
-	    res.end('good login');
-	    return;
-	}
+	}// else if (ui==3) { //test account
+	//  res.writeHead(200, {'Content-Type': 'text/plain'});
+	//    res.end('good login');
+	//    return;
+	//}
 	data  = decodeURI(d.data);
 	console.log("recieved:",data);
 	fs.open(userfile(ui),'w',function(err,fd) {
