@@ -20,6 +20,9 @@ function findfirst(arraylike, val) {
 	if (arr[i] == val) return i;
     return -1;
 }
+function concatv(arraylike,lists) {
+    return concat.apply(concat,concat([arraylike],lists));
+}
 
 //aliases
 function byid(id){return document.getElementById(id);}
