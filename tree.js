@@ -3,186 +3,17 @@ var ids=0;
 function getkids(parent){
     return slice($toel(parent).childNodes[1].childNodes);
 }
-//this isn't very elegant imo...
-function allkids(parent){
-    var kids = getkids(parent);
-    if (!kids.length) return [];
-    //don't ask
-    return concat.apply(concat,concat([kids], map(kids,allkids)));
+//get the parent of the child
+function parentof(child){
+    return nodefor(nodefor(child).parentElement);
 }
-function maptodivs(parent,f){return getkids(parent).map(f);}
-//herpaderp
+//herpaderp, trivial callback
 function return_false(){return false;}
 
-//get the node for the given element
+//get the node element for the given sub-element
 function nodefor(el) {
     return byid(idof(el).match(/(^[0-9]+|root)/)[0]);
 }
-//drag-and-drop shit
-
-var drag = null;
-var Drag = function(src) {
-    this.src=src;
-    //set all the bad ids
-    this.bad_ids= map(allkids(src),idof);
-    //letting my old C-ness shine through
-    for(var cur=src.parentElement.parentElement;
-	idof(cur) !== "root";
-	cur=cur.parentElement.parentElement)
-	this.bad_ids.push(idof(cur));
-    this.bad_ids.push("root");
-    this.parent = src.parentElement.parentElement;
-    //over state information
-    this.overstate = "none";
-};
-Drag.prototype.valid_target = function (obj) {
-    return !has(this.bad_ids, idof(obj));
-};
-Drag.prototype.finalize = function () {
-    del_hide(this.parent);
-    this.over_cleanup();
-};
-Drag.prototype._shift = function(el,inclusive) {
-    function getunder(el){
-	// this should only be called from visible nodes.
-	// It doesn't add children inside other nodes since moving
-	// the parent should move the others.
-	if (idof(el) == "root") return [];
-	//first count the siblings under this
-	var parent = el.parentElement;
-	var under = parent.childNodes;
-	under = slice(under, findfirst(under,el)+1);
-	//advance up a level
-	parent = parent.parentElement;
-	return concat(getunder(parent),under);
-    }
-    var under = getunder(el);
-    if (inclusive)
-	under.push(el);
-    under.map(function(c){
-	addclass(c,"shift-down");
-    });
-    this.overstate = "shift";
-    this.current_over = idof(el);
-    this.shifted = under;
-    this.before  = inclusive;
-}
-Drag.prototype.over_shift = function(el,inclusive) {
-    var id=idof(el);
-    if (this.overstate === "shift"
-	&& (this.current_over === id || id === "root"))
-	return;
-    this.over_cleanup();
-    this._shift(el,inclusive);
-}
-Drag.prototype._insert = function(el) {
-    addclass(el, "move-right");
-    this.overstate = "insert";
-    this.current_over = idof(el);
-}
-Drag.prototype.over_insert = function(el) {
-    var id=idof(el);
-    if (this.overstate === "insert"
-	&& (this.current_over === id || id === "root"))
-	return;
-    this.over_cleanup();
-    this._insert(el);
-}
-Drag.prototype.over_cleanup = function() {
-    if (this.overstate === "shift") {
-	this.shifted.map(function(c){
-	    $(c).rmclass("shift-down").addclass("shift-back-up");
-	    setTimeout(function(){rmclass(c,"shift-back-up");},200);
-	});
-	delete this.shifted;
-	delete this.before;
-    } else if (this.overstate === "insert") {
-	var cur = $byid(this.current_over);
-	cur.rmclass("move-right").addclass("move-back-left");
-	cur = cur.el;
-	setTimeout(function(){rmclass(cur,"move-back-left");},200);
-    }
-    this.overstate = "none";
-    this.current_over = null;
-}
-
-//drag-and-drop callbacks
-function dndstart(e){
-    var src = nodefor(e.target);
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData('text/html','blarg');
-    e.dataTransfer.setDragImage(src,0,0);
-    drag = new Drag(src);
-}
-
-var area = {
-    bottom:0,top:1,insert:2,invalid:3
-}
-function overarea(target,y){
-    var head_rect = byid(idof(target)+"-header").getBoundingClientRect();
-    var me_rect   = target.getBoundingClientRect();
-    var width = 4;
-    if (y > me_rect.bottom-width)
-	return area.bottom;
-    else if (y < me_rect.top+width)
-	return area.top;
-    else if (y > head_rect.top+width && y < head_rect.bottom-width)
-	return area.insert;
-    else
-	return area.invalid;
-}
-function dndover(e){
-    if (drag == null)
-	return true; //drag not initiated by application
-    //restore the guys shifted down before.
-    //checking if valid
-    var target = nodefor(e.target);
-    if(!drag.valid_target(target))
-	return false;
-    e.preventDefault && e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-    if(idof(target) == idof(drag.src)) {
-	drag.over_cleanup();
-	return false;
-    }
-    //finding whats covered
-    var i = overarea(target,e.clientY);
-    switch (i) {
-	case area.insert:
-	    drag.over_insert(target);
-	    break;
-	case area.top:
-	    drag.over_shift(target, true);
-	    break;
-	case area.bottom:
-	    drag.over_shift(target);
-	    break;
-    }
-    return false;
-}
-
-function dnddrop(e){
-    if (drag == null)
-	return true;
-    e.stopPropagation && e.stopPropagation();
-    if (drag.overstate === "insert") {
-	insert_leaf($byid(drag.current_over), drag.src);
-	saver.up();
-    } else if (drag.overstate === "shift") {
-	if (drag.before) {
-	    insert_before(drag.src, $byid(drag.current_over));
-	} else {
-	    insert_after(drag.src, $byid(drag.current_over));
-	}
-	saver.up();
-    } else {console.log("no overstate");}
-    drag.finalize();
-}
-
-function dndend(e) {
-    drag = null;
-}
-
 //saver
 var saver = saver || {};
     
@@ -228,65 +59,18 @@ function mkpush_button(id,classes,inner,clickf) {
     return ret.el;
 }
 
-function make_child(parentid,text,skipHide)
-{
-    ids+=1;
-    var myid=ids;
-    var child =
-    $mkdiv(myid,"node").append(
-	/*header*/
-	$mkdiv(
-	    myid+"-header","header"
-	).append(
-	    mkinput(myid+"-input","textinput",text)
-	).append(
-	    $mkdiv(
-		myid+"-butts","butbox"
-	    ).append(
-		//add button
-		$mkbutton(myid+"+", "addbutton", function(){make_child(myid,'New Note');}
-		).append(
-		    mkdiv(myid+"+_1","add1"),mkdiv(myid+"+_2","add2")
-		)
-	    ).append(
-		//rm button
-		$mkbutton(myid+"x", "delbutton", function(){del(myid);}
-		).append(
-		    mkdiv(myid+"+_1","rm1"),mkdiv(myid+"+_2","rm2")
-		)
-	    ).append(
-		$mkbutton(
-		    myid+"D","dragbutton"
-		).attr(
-		    "draggable","true"
-		).evliss(
-		    "dragstart", dndstart,
-		    "dragend", dndend
-		)
-	    )
-	),
-	/*children*/
-	$mkdiv(
-	    myid+"-children"
-	)
-	/*active buttons*/
-    ).el;
-    insert_leaf(byid(parentid),child,skipHide)
-    return child;
-}
-
-
 function insert_leaf(parent,el,skipHide){
     parent = $toel(parent);
     $byid(idof(parent)+"-children").append(el);
+    focus(el);
     /*checking if first child*/
-    if (getkids(parent).length == 1 && !skipHide) {
-	add_hide(parent);
-	console.log("success");
-    }
+    if (getkids(parent).length > 0 && !skipHide)
+	rmclass(parent, "childless");
+    
 }
 
 function focus(id){
+    if (typeof id === "object") id = idof(id);
     byid(id+"-input").focus();
 }
 
@@ -294,30 +78,12 @@ function _visible(hidestate) {
     return !hasclass(hidestate,"hidbutton-show");
 }
 function kidsvisible(el) {
-    return _visible(by(idof(el)+"-"));
+    return byid(idof(el)+"-") && _visible(byid(idof(el)+"-"));
 }
 
-function add_hide(id) {
-    if ( typeof(id) === "object" )
-	id = idof(id);
-    var hide = byid(id+'-');
-    if ( !hide ) {
-	hide = $mkbutton(
-	    id+"-","hidbutton",function(){hide_toggle(id);}
-	).append(
-	    mkdiv(id+"-"+"_1","hid1"),mkdiv(id+"-"+"_2","hid2")
-	);			    
-	insert_before(hide, byid(id+'-input'));
-    }
-    return hide.el;
-}
-
-function del_hide(id) {
-    if ( typeof(id) === "object")
-	id = idof(id);
-    if (!id) return; 
-    if (getkids(byid(id)).length == 0)
-	byid(id+'-header').removeChild(byid(id+"-"));
+function check_hide(parent) {
+    if (getkids(parent).length == 0)
+	addclass(parent,"childless");
 }
 
 function show_kids(id) {
@@ -337,29 +103,102 @@ function hide_kids(id) {
     $(children).rmclass("visible").addclass("hidden");
 }
 
-function hide_toggle(id) {
-    if (typeof(id) == "object") id = idof(id);
-    var hbtn = byid(id+"-");
-    if (_visible(hbtn)) {
-	hide_kids(byid(id));
-	$(hbtn).addclass("hidbutton-show");
-    } else {
-	show_kids(byid(id));
-	$(hbtn).rmclass("hidbutton-show");
+function make_child(parent,text,root,
+		    skipHide,noanimate)
+{
+    ids++;
+    var myid=ids;
+    var child = $mkdiv(myid,"node").append(
+	/*header*/
+	$mkdiv(
+	    myid+"-header","header"
+	).append(
+	    /*hide button*/
+	    $mkbutton(
+		myid+"-","hidbutton",
+		function(){hide_toggle(child,root);}
+	    ).append(
+		mkdiv(myid+"-"+"_1","hid1"), mkdiv(myid+"-"+"_2","hid2")
+	    )
+	).append(
+	    /*text input*/
+	    mkinput(myid+"-input","textinput",text)
+	).append(
+	    $mkdiv(
+		/*button box*/
+		myid+"-butts","butbox"
+	    ).append(
+		//add button
+		$mkbutton(
+		    myid+"+", "addbutton",
+		    function(){make_child(child,'New Note',root);}
+		).append(
+		    mkdiv(myid+"+_1","add1"),mkdiv(myid+"+_2","add2")
+		)
+	    ).append(
+		//rm button
+		$mkbutton(
+		    myid+"x", "delbutton",
+		    function(){del(child,root);}
+		).append(
+		    mkdiv(myid+"+_1","rm1"),mkdiv(myid+"+_2","rm2")
+		)
+	    ).append(
+		//move tart button
+		$mkbutton(
+		    myid+"M","dragbutton"
+		).evliss(
+		    "mousedown", function(e){return root.start_move(e);}
+		)
+	    ).append(
+		$mkdiv("herpaderp"+myid,"",myid)
+	    )
+	),
+	/*children*/
+	$mkdiv(
+	    myid+"-children"
+	)
+	/*new kids do not have children*/
+    ).addclass(
+	"childless"
+    ).el;
+    if (!noanimate) {
+	addclass(child,"new");
+	setTimeout(function(){rmclass(child,"new");},300);
     }
+    insert_leaf(parent,child,skipHide);
+    return child;
 }
 
+function hide_toggle(node, root) {
+    var id = idof(node);
+    var hbtn = byid(id+"-");
+    if (_visible(hbtn)) {
+	hide_kids(node);
+	$(hbtn).addclass("hidbutton-show");
+    } else {
+	show_kids(node);
+	$(hbtn).rmclass("hidbutton-show");
+    }
+    root.update_visible();
+}
 
-function save(loginfo) {
+function del(me,root) {
+    if ( typeof(me) == "string" || typeof(me) == "number")
+	me = byid(me);
+    root.rm(me);
+}
+
+function save(root,loginfo) {
     function save_r(el) {
 	return {
 	    text:     byid(idof(el)+'-input').value,
-	    children: maptodivs(el,function(c){ return save_r(c);})
+	    children: getkids(el).map(function(c){ return save_r(c);})
 	};
     }
     console.log("saving...");
     
-    var data = map(byid('root-children').children, save_r);
+    var data = getkids(root).map(save_r);
     var xhr = mkxhr();
     xhr.onreadystatechange = (function(){
 	if (xhr.readyState === 4 && xhr.status === 200) {
@@ -377,43 +216,34 @@ function save(loginfo) {
 	     '&password='+loginfo.passwd);  
 }
 
-function del(me) {
-    if ( typeof(me) == "string" || typeof(me) == "number")
-	me = byid(me);
-    var container = me.parentElement;
-    container.removeChild(me);
-    del_hide(container.parentElement);
-}
-
-function restore_req(loginfo) {
+function restore_req(root,loginfo) {
     xhr=mkxhr();
     xhr.onreadystatechange = function() {
 	console.log("got response");
 	if(xhr.readyState === 4 && xhr.status === 200)
-	    restore(xhr.responseText)
+	    restore(root, xhr.responseText);
     };
     xhr.open("POST","/get",true);
     xhr.send("username="+loginfo.uname+
 	     "&password="+loginfo.passwd);
 }
 
-function restore(data) {
-    
-    function restore_r(nodeid,cur,ignorehide/*dirty hack*/) {	
-	var child  = make_child(nodeid,cur.text,ignorehide);
-	var parent = ids;
-	map(cur.children,function(c){
-	    restore_r(parent,c);
+function restore(root, data) {
+    function restore_r(node,cur,ignorehide) {	
+	var child  = make_child(node, cur.text, root, ignorehide,true);
+	cur.children.map(function(c){
+	    restore_r(child, c);
 	});
 	return child;
     }
     JSON.parse(data).map(function(c) {
-	var child=restore_r("root",c,true);
+	var child=restore_r(root,c,true);
     });
-    getkids(byid("root")).map(function(c) {
+    getkids(root.el).map(function(c) {
 	if (getkids(c).length != 0)
 	    hide_kids(c);
     });
+    root.update_visible();
 }
 
 function clean(){ docCookies.removeItem('tree');}
@@ -499,56 +329,287 @@ function notify(message){
     );
 }
 
+//obtain a list of visible
+function visiblekids(parent) {
+    function _visible_kids_bad(cur) {
+	var kids = getkids(cur);	
+	if (!kids.length) return [];
+	return concatv(kids, kids.filter(function(c){
+	    return kidsvisible(c);
+	}).map(_visible_kids));
+    }
+    function _visible_kids_dfs(cur) {
+	var ret=[], kids=getkids(cur);
+	for (var i = 0; i < kids.length; ++i) {
+	    ret = ret.concat(kids[i]);
+	    if (kidsvisible(kids[i]))
+		ret = ret.concat(_visible_kids_dfs(kids[i]));
+	}
+	return ret;
+    }
+    return _visible_kids_dfs(parent);
+}
+
+function tempmove(el,dr,transtime) {
+    var movestyle ="transform: \
+translateY("+dr.y+"px)\
+translateX("+dr.x+"px);";
+    if (transtime) movestyle+="transition: "+transtime+"s ease-in;";
+    el.style = movestyle;
+}
+
+const area = {
+    bottom:0,top:1,insert:2,invalid:3
+}
+
+
 function initapp(loginfo,suppressNotify) {
     strip();
-    saver = new (function(_loginfo){
-	this.num=0;
-	this.up = function() {
-	    this.num+=1;
-	    if ( this.num > 20 ) {
-		console.log("auto-saving...");
-		save(_loginfo);
-		this.num=0;
-	    }
-	};
-    })(loginfo);
+    if (!loginfo && !suppressNotify) setTimeout(function(){
+	notify("We we're unable to log in...<br/>"
+	       +"Data will not be saved.");
+    },100);
     var root = (function(){
-	var ret = $mkdiv(
+	/*we first create the data*/
+	var app = $mkdiv(
 	    "root"
 	).append(
 	    $mkdiv(
-		"root-header"
+		"root-header","root-header"
 	    ).append(
 		mkpush_button("new", [], "New", function(){
-		    make_child('root','New Note',true);})
+		    make_child(app.el,'New Note', app, true);})
 	    ).append(
 		mkpush_button("save", [], "Save",
-			      function(){save(loginfo);})
+			      function(){save(app.el, loginfo);})
 	    )
 	).append(
 	    $mkdiv(
 		"root-children"
-	    ).evliss(
-		"dragenter", return_false
 	    )
 	).evliss(
-	    "dragover",  dndover,
-	    "dragenter", return_false,
-	    "drop",      dnddrop
+	    "mousemove", function(e){app.move(e);},
+	    "mouseup", function(e){app.end_move(e);}
 	);
-	return ret.el;
+	/*then, we create the methods*/
+	app.start_move = function(e) {
+	    this.possible = nodefor(e.target);
+	    var tmp = this.possible.getBoundingClientRect();
+	    this.offset = {
+		x:e.clientX-tmp.x, y:e.clientY-tmp.y
+	    };
+	};
+	app.overarea = function(e) {
+	    var y = e.clientY;
+	    //getting the element over
+	    var i = Math.floor((y-58)/40);
+	    if (i < 0 || i > this.visible.length-1) return;
+	    var over = this.visible[i];
+	    var over_rect = over.getBoundingClientRect(),
+		head_rect = byid(idof(over)+"-header").getBoundingClientRect();
+	    var width = 4;
+	    var retarea;
+	    if (y > over_rect.bottom-width)
+		retarea = area.bottom;
+	    else if (y < over_rect.top+width)
+		retarea = area.top;
+
+	    else if (y > head_rect.top+width && y < head_rect.bottom-width)
+		retarea = area.insert;
+	    else
+		retarea = area.invalid;
+	    return {area:retarea, target:over, i:i};
+	}
+	app.move = function(e) {
+	    if(!this.movee) {
+		if(!this.possible) {
+		    return;
+		} else {
+		    this.movee = this.possible;
+		    this.oldcontext = {
+			parent : parentof(this.movee),
+			after : this.movee.nextSibling
+		    };
+		    this.el.appendChild(this.movee);
+		    delete this.possible;
+		    addclass(this.movee, "above");
+		    this.undropable = visiblekids(this.movee).map(idof);
+		    this.update_visible();
+		}
+	    }
+	    var dr = {x:e.clientX-this.offset.x-20,
+		      y:e.clientY-this.offset.y-20};
+	    tempmove(this.movee,dr);
+	    var over = this.overarea(e);
+	    if (!over || !this.valid_target(over.target)) return;
+	    if (over.target == this.movee) {this.over_cleanup(); return;}
+	    switch (over.area) {
+	    case area.insert:
+		this.over_insert(over.target);
+		break;
+	    case area.top:
+		this.over_shift(over.target, over.i,true);
+		break;
+	    case area.bottom:
+		this.over_shift(over.target, over.i);
+		break;
+	    }
+	};
+	app.update_visible = function() {
+	    this.visible = visiblekids(this.el);
+	};
+	function unmove(el){
+	    setTimeout(function(){
+		el.style="transform: translateY(0px) translateX(0px); transition: 0.2s ease-in;";
+	    },1);
+	    setTimeout(function(){
+		el.style="";
+	    },300);
+
+	}
+	app.end_move = function(e) {
+	    if(!this.movee) return;
+	    if (this.overstate === "insert") {
+		insert_leaf($byid(this.current_over), this.movee);
+		saver.up();
+	    } else if (this.overstate === "shift") {
+		var insertf = this.before ? insert_before : insert_after;
+		var current = this.movee.getBoundingClientRect();
+		var over = $byid(this.current_over).el;
+		var newpos = over.getBoundingClientRect();
+		rmclass(this.movee,"above");
+		insertf(this.movee, over);
+		
+		tempmove(this.movee,
+			 {
+			     x:current.x-44,
+			     y:current.y-newpos.y+(this.before?40:0)
+			 }
+		);
+		unmove(this.movee);
+		saver.up();
+	    } else {console.log("no overstate");}
+	    delete this.movee;
+	    check_hide(this.oldcontext.parent);
+	    this.over_cleanup(true);
+	    this.update_visible();
+	};
+	app.valid_target = function (obj) {
+	    return !has(this.undropable, idof(obj));
+	};
+	app.over_shift_old = function(el,i,inclusive) {
+	    var id=idof(el);
+	    if (this.overstate === "shift"
+		&& (this.current_over === id || id === "root"))
+		return;
+	    if (!inclusive)++i;
+	    var under = this.visible.slice(i,this.visible.length);
+	    this.over_cleanup();
+	    under.map(function(c){
+		addclass(c,"shift-down");
+	    });
+	    this.overstate = "shift";
+	    this.current_over = idof(el);
+	    this.shifted = under;
+	    this.before  = inclusive;
+	};
+	app.over_shift = function(el,i,inclusive) {
+	    var id=idof(el);
+	    if (this.overstate === "shift"
+		&& (this.current_over === id || id === "root"))
+		return;
+	    
+	    var tmp = $mkdiv("temp",["temp","new"]);
+	    this.over_cleanup();
+	    if (inclusive) insert_before(tmp,el);
+	    else insert_after(tmp,el);
+	    this.overstate = "shift";
+	    this.current_over = id;
+	    this.before  = inclusive;
+	};
+	app.over_insert = function(el) {
+	    var id=idof(el);
+	    if (this.overstate === "insert"
+		&& (this.current_over === id || id === "root"))
+		return;
+	    app.over_cleanup();
+	    addclass(el, "move-right");
+	    this.overstate = "insert";
+	    this.current_over = idof(el);
+	};
+	app.over_cleanup = function(instant) {
+	    if (this.overstate === "shift") {
+		var undofunc;
+		var temp = $byid("temp");
+		if(!instant) {
+		    temp.addclass("shrink");
+		    setTimeout(function(){
+			temp.el.parentElement.removeChild(temp.el);
+		    },200);
+		} else {
+		    temp.el.parentElement.removeChild(temp.el);
+		}
+			   /*
+		if (!instant) {
+		    undofunc = (function(c){
+			$(c).rmclass("shift-down").addclass("shift-back-up");
+			setTimeout(function(){
+			    rmclass(c,"shift-back-up")
+			},200);
+		    });
+		} else {
+		    undofunc = (function(c){
+			rmclass(c,"shift-down");
+		    });
+		}
+		this.shifted.map(undofunc);*/
+		delete this.before;
+	    } else if (this.overstate === "insert") {
+		var cur = $byid(this.current_over);
+		cur.rmclass("move-right").addclass("move-back-left");
+		cur = cur.el;
+		setTimeout(function(){rmclass(cur,"move-back-left");},200);
+	    }
+	    this.overstate = "none";
+	    this.current_over = null;
+	};
+	app.rm = function(el) {
+	    this.update_visible();
+	    var parent = parentof(el);
+	    var container = el.parentElement;
+	    var i = findfirst(this.visible,el);
+	    if (i < 0) return;
+	    addclass(el,"erase");
+	    setTimeout(function(){
+		container.removeChild(el);
+		check_hide(parent);
+	    },300);
+	    this.update_visible();
+	}
+	restore_req(app, loginfo);
+
+	saver = new (function(_root,_loginfo){
+	    this.num=0;
+	    this.up = function() {
+		this.num+=1;
+		if ( this.num > 20 ) {
+		    console.log("auto-saving...");
+		    save(_root,_loginfo);
+		    this.num=0;
+		}
+	    };
+	})(app.el,loginfo);
+	
+	return app.el;
     })();
+    document.body.appendChild(root);
+    
     evlis(window,'keydown',function(e){
 	if (e.crtlKey && e.keyCode===83) {
 	    e.preventDefault();
+	    e.stopPropagation();
 	    console.log("save attempt");
 	    return false;
 	}
     },false);
-    document.body.appendChild(root);
-    if (!loginfo && !suppressNotify) setTimeout(function(){
-	notify("We we're unable to log in...<br/>"
-	      +"Data will not be saved.");
-    },100);
-    else restore_req(loginfo);
 }

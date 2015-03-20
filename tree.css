@@ -1,12 +1,12 @@
-/*@textcolor: rgb(170,170,170);*/
-/*@highlight: rgb(180,180,180);*/
+
 .node {
-    padding: 2px;
-    position: relative;
-    margin-top: 0.5em;
-    margin-left: 1em;
-    display: block;
+	position: relative;
+	margin-top: 15px;
+	margin-left: 1em;
+	display: block;
+	width: 400px;
 }
+
 body{
     background: rgb(40,40,40);
 }
@@ -25,7 +25,6 @@ input[type=input].textinput{
     width: 200px;
     font-size: medium;
 }
-
 #root{
     minwidth: 500px;
     padding: 20px;
@@ -41,12 +40,12 @@ body, input[type=input], input[type=password]{
 .hidden{
     max-height: 0px;
     overflow: hidden;
-/*    transition: 0.3s linear;
-    -webkit-transition: 0.3s linear;*/
+    transition: 0.3s linear;
+    -webkit-transition: 0.3s linear;
 }
 
 .visible{
-    max-height: 4000px;
+    max-height: 400px;
     transition: 0.3s ease-out;
     -webkit-transition: 0.3s ease-out;
 }
@@ -57,12 +56,14 @@ body, input[type=input], input[type=password]{
 
 .header {
     display: flex;
-    min-height: 15px;
+    height: 25px;
     flex-direction: row;
     align-items: center;
     left: 0px;
     bottom:  0px;
-    /*width: 40%;*/
+}
+.root-header {
+	height: 30px;
 }
 
 .button{
@@ -91,7 +92,7 @@ body, input[type=input], input[type=password]{
     top: -0;
     transition: 0.1s;
     -webkit-transition: 0.1s;
-    z-index: 2;
+    z-index: 1;
 }
 
 .butbox:hover{
@@ -128,7 +129,7 @@ body, input[type=input], input[type=password]{
     left: 10%;
     width: 80%;
     height: 20%;
-    z-index:1;
+    z-index: 2;
 }
 .butbox:hover .addbutton .add2{
     background: rgb(24,160,14);
@@ -137,7 +138,7 @@ body, input[type=input], input[type=password]{
     left: 10%;
     width: 80%;
     height: 20%;
-    z-index:2;
+    z-index: 2;
     transform: rotate(-90deg);
 }
 
@@ -155,7 +156,7 @@ body, input[type=input], input[type=password]{
     width: 90%;
     height: 20%;
     transform: rotate(45deg);
-    z-index:1;
+    z-index: 2;
 }
 .butbox:hover .delbutton .rm2{
     background: rgb(160,24,14);
@@ -164,11 +165,14 @@ body, input[type=input], input[type=password]{
     left: 6%;
     width: 90%;
     height: 20%;
-    z-index:2;
+    z-index: 2;
     transform: rotate(-45deg);
 }
 
 /* hidbutton */
+.childless .hidbutton {
+	display: none;
+}
 .hidbutton {
     position: relative;
     background: rgb(110,110,20);
@@ -181,7 +185,7 @@ body, input[type=input], input[type=password]{
     left: 10%;
     width: 80%;
     height: 20%;
-    z-index:2;
+    z-index: 2;
 }
 
 .hidbutton .hid2 {
@@ -197,7 +201,7 @@ body, input[type=input], input[type=password]{
     left: 10%;
     width: 80%;
     height: 20%;
-    z-index:2;
+    z-index: 2;
     transform: rotate(-90deg);
 }
 
@@ -205,37 +209,7 @@ body, input[type=input], input[type=password]{
     background: rgb(20,00,99);
 }
 
-.overtop:after {
-    content: "";
-    position: absolute;
-    background: rgb(150,150,150);
-    width: 30px;
-    height: 2px;
-    top: 0px;
-    left: 5px;
-    width: 25px;
-}
 
-.overbot:after {
-    content: "";
-    position: absolute;
-    background: rgb(150,150,150);
-    width:30px;
-    height: 2px;
-    bottom: 0px;
-    left: 5px;
-    width: 25px;
-}
-
-.overmid:after {
-    content: "";
-    position: absolute;
-    background: rgb(150,150,150);
-    width: 2px;
-    height: 14px;
-    left: 0px;
-    top: 7px;
-}
 /*
 // modal
 */
@@ -358,7 +332,6 @@ body, input[type=input], input[type=password]{
     100% {-webkit-transform: translateY(0);}
 }
 
-
 @keyframes updiag{
     0% {transform: translateY(0);}
     35% {transform: translateY(10px);}
@@ -369,25 +342,96 @@ body, input[type=input], input[type=password]{
     35% {-webkit-transform: translateY(10px);}
     100% {-webkit-transform: translateY(-400px);}
 }
-
 /*
  * Shifting due to inserting and reordering
  */
 .shift-down{
-    transform: translateY(15px);
-    transition: 0.2s ease-in;
-}
-.shift-back-up{
-    transform: translateY(0px);
+    transform: translateY(40px);
     transition: 0.2s ease-in;
 }
 
+.shift-back-up{
+	transform: translateY(0px);
+	transition: 0.2s ease-in;
+}
+
+.erase{
+	animation-name: scaleup;
+	-webkit-animation-name: scaleup;
+	animation-iteration-count: 1;
+	-webkit-animation-iteration-count: 1;
+	animation-timing-function: ease-in;
+	-webkit-animation-timing-function: ease-in;
+	animation-duration: 0.3s;
+	-webkit-animation-duration: 0.3s;
+	animation-fill-mode: forwards;
+	-webkit-animation-fill-mode: forwards;
+	overflow: hidden;
+}
+.new{
+	animation-name: scaledown;
+	-webkit-animation-name: scaledown;
+	animation-iteration-count: 1;
+	-webkit-animation-iteration-count: 1;
+	animation-timing-function: ease-in;
+	-webkit-animation-timing-function: ease-in;
+	animation-duration: 0.1s;
+	-webkit-animation-duration: 0.1s;
+	animation-fill-mode: forwards;
+	-webkit-animation-fill-mode: forwards;
+	overflow: hidden;
+}
+@keyframes scaleup{
+	0% {
+		max-height:25px;
+		margin-top:15px;
+	}
+	100%{
+		max-height: 0;
+		margin-top:0px;
+	}
+}
+@keyframes scaledown{
+	0%{
+		max-height: 0;
+		margin-top:0px;
+	}
+	100% {
+		max-height:25px;
+		margin-top:15px;
+	}
+}
+
+
+.move-back{
+	transform: translateX(0px) translateY(0px);
+	transition: 0.5s ease-in;
+}
 
 .move-right{
     transform: translateX(10px);
-    transition: 0.2 ease-in;
+    transition: 0.2s ease-in;
 }
 .move-back-left{
     transform: translateX(0px);
     transition: 0.2s ease-in;
+}
+
+.above{
+	z-index: 5;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	box-shadow: 2px 2px 5px 6px #222;
+	background: rgb(40,40,40);
+}
+
+.temp {
+	width: 200px;
+	height: 25px;
+	margin-top:15px;
+}
+.shrink {
+	transform: scaleY(0.0);
+	transition: 0.2s ease-in;
 }
