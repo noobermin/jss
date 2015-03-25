@@ -577,8 +577,6 @@ function initapp(loginfo,suppressNotify) {
 	    this.update_visible();
 	    var parent = parentof(el);
 	    var container = el.parentElement;
-	    var i = findfirst(this.visible,el);
-	    if (i < 0) return;
 	    addclass(el,"erase");
 	    setTimeout(function(){
 		container.removeChild(el);
