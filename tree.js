@@ -180,7 +180,6 @@ function hide_toggle(node, root) {
 	show_kids(node);
 	$(hbtn).rmclass("hidbutton-show");
     }
-    root.update_visible();
 }
 
 function del(me,root) {
@@ -243,7 +242,6 @@ function restore(root, data) {
 	if (getkids(c).length != 0)
 	    hide_kids(c);
     });
-    root.update_visible();
 }
 
 function clean(){ docCookies.removeItem('tree');}
@@ -362,7 +360,6 @@ const area = {
     bottom:0,top:1,insert:2,invalid:3
 }
 
-
 function initapp(loginfo,suppressNotify) {
     strip();
     if (!loginfo && !suppressNotify) setTimeout(function(){
@@ -399,7 +396,7 @@ function initapp(loginfo,suppressNotify) {
 		x:e.clientX-tmp.x, y:e.clientY-tmp.y
 	    };
 	};
-	app.overarea = function(e) {
+	app.old_overarea = function(e) {
 	    var y = e.clientY;
 	    //getting the element over
 	    var i = Math.floor((y-58)/40);
@@ -420,6 +417,55 @@ function initapp(loginfo,suppressNotify) {
 		retarea = area.invalid;
 	    return {area:retarea, target:over, i:i};
 	}
+	
+	const overlap = {
+	    notin:0, inbody:1, inhead:2, inall:3
+	}
+	function insidebox(x, y, body, head) {
+	    if (y.constructor && y.constructor === DOMRect) {
+		head = body;
+		body = y;
+		var tmp = x;
+		x = tmp.x;
+		y = tmp.y;
+	    }
+	    var ret=0;
+	    if(y > body.top && y < body.bottom && x > body.left && y < body.right)
+		ret |= overlap.inbody;
+	    if(y > head.top && y < head.bottom && x > head.left && y < head.right)
+		ret |= overlap.inhead;
+	    return ret;
+	}
+	app.overarea = function(e) {
+	    var x=e.clientX,y=e.clientY;
+	    var matches = this.visible.map(function(c){
+		return insidebox(e.clientX, e.clientY, c.body,c.head);
+	    });
+	    var head=true;
+	    var i = findfirst(matches, function(c){
+		return c & overlap.inhead;
+	    });
+	    if (i==-1) {
+		i = findfirst(matches, function(c){
+		    return c & overlap.inbody;
+		});
+		head = false;
+	    }
+	    if (i==-1) return;
+	    //getting the element over
+	    const width=4;
+	    var over = this.visible[i];//here
+	    if (y > over.body.bottom-width)
+		retarea = area.bottom;
+	    else if (y < over.body.top+width)
+		retarea = area.top;
+	    else if (y > over.head.top+width && y < over.head.bottom-width)
+		retarea = area.insert;
+	    else
+		retarea = area.invalid;
+	    return {area:retarea, target:byid(over.id), i:i};
+	}
+
 	app.move = function(e) {
 	    if(!this.movee) {
 		if(!this.possible) {
@@ -430,11 +476,24 @@ function initapp(loginfo,suppressNotify) {
 			parent : parentof(this.movee),
 			after : this.movee.nextSibling
 		    };
-		    this.el.appendChild(this.movee);
+		    this.append(this.movee);
 		    delete this.possible;
 		    addclass(this.movee, "above");
 		    this.undropable = visiblekids(this.movee).map(idof);
-		    this.update_visible();
+		    //create the "visible kids" thing
+		    this.visible = visiblekids(
+			this.el
+		    ).map(function(c){
+			var id = idof(c);
+			var box = c.getBoundingClientRect(),
+			    head = byid(idof(c)+"-header").getBoundingClientRect();
+			return {
+			    id : id,
+			    body: c.getBoundingClientRect(),
+			    head: byid(id+"-header").getBoundingClientRect()
+			};
+		    });
+		    
 		}
 	    }
 	    var dr = {x:e.clientX-this.offset.x-20,
@@ -442,21 +501,17 @@ function initapp(loginfo,suppressNotify) {
 	    tempmove(this.movee,dr);
 	    var over = this.overarea(e);
 	    if (!over || !this.valid_target(over.target)) return;
-	    if (over.target == this.movee) {this.over_cleanup(); return;}
 	    switch (over.area) {
 	    case area.insert:
 		this.over_insert(over.target);
 		break;
 	    case area.top:
-		this.over_shift(over.target, over.i,true);
+		this.over_shift(over.target, true);
 		break;
 	    case area.bottom:
-		this.over_shift(over.target, over.i);
+		this.over_shift(over.target);
 		break;
 	    }
-	};
-	app.update_visible = function() {
-	    this.visible = visiblekids(this.el);
 	};
 	function unmove(el){
 	    setTimeout(function(){
@@ -467,33 +522,6 @@ function initapp(loginfo,suppressNotify) {
 	    },300);
 
 	}
-	app.end_move = function(e) {
-	    if(!this.movee) return;
-	    if (this.overstate === "insert") {
-		insert_leaf($byid(this.current_over), this.movee);
-		saver.up();
-	    } else if (this.overstate === "shift") {
-		var insertf = this.before ? insert_before : insert_after;
-		var current = this.movee.getBoundingClientRect();
-		var over = $byid(this.current_over).el;
-		var newpos = over.getBoundingClientRect();
-		rmclass(this.movee,"above");
-		insertf(this.movee, over);
-		
-		tempmove(this.movee,
-			 {
-			     x:current.x-44,
-			     y:current.y-newpos.y+(this.before?40:0)
-			 }
-		);
-		unmove(this.movee);
-		saver.up();
-	    } else {console.log("no overstate");}
-	    delete this.movee;
-	    check_hide(this.oldcontext.parent);
-	    this.over_cleanup(true);
-	    this.update_visible();
-	};
 	app.valid_target = function (obj) {
 	    return !has(this.undropable, idof(obj));
 	};
@@ -513,26 +541,25 @@ function initapp(loginfo,suppressNotify) {
 	    this.shifted = under;
 	    this.before  = inclusive;
 	};
-	app.over_shift = function(el,i,inclusive) {
+	app.over_shift = function(el, inclusive) {
 	    var id=idof(el);
-	    if (this.overstate === "shift"
-		&& (this.current_over === id || id === "root"))
+	    if (this.overstate === "shift") {
 		return;
-	    
-	    var tmp = $mkdiv("temp",["temp","new"]);
+	    }
 	    this.over_cleanup();
+	    var tmp = $mkdiv("temp",["temp","new"]);
 	    if (inclusive) insert_before(tmp,el);
 	    else insert_after(tmp,el);
 	    this.overstate = "shift";
 	    this.current_over = id;
-	    this.before  = inclusive;
+	    this.before = inclusive;
 	};
 	app.over_insert = function(el) {
 	    var id=idof(el);
 	    if (this.overstate === "insert"
 		&& (this.current_over === id || id === "root"))
 		return;
-	    app.over_cleanup();
+	    this.over_cleanup();
 	    addclass(el, "move-right");
 	    this.overstate = "insert";
 	    this.current_over = idof(el);
@@ -544,6 +571,7 @@ function initapp(loginfo,suppressNotify) {
 		if(!instant) {
 		    temp.addclass("shrink");
 		    setTimeout(function(){
+			console.log(temp.el.parentElement);
 			temp.el.parentElement.removeChild(temp.el);
 		    },200);
 		} else {
@@ -574,7 +602,6 @@ function initapp(loginfo,suppressNotify) {
 	    this.current_over = null;
 	};
 	app.rm = function(el) {
-	    this.update_visible();
 	    var parent = parentof(el);
 	    var container = el.parentElement;
 	    addclass(el,"erase");
@@ -582,8 +609,36 @@ function initapp(loginfo,suppressNotify) {
 		container.removeChild(el);
 		check_hide(parent);
 	    },300);
-	    this.update_visible();
-	}
+	};
+	app.end_move = function(e) {
+	    if(!this.movee) return;
+	    var current = this.movee.getBoundingClientRect();
+	    var over = $byid(this.current_over).el;
+	    var newpos = over.getBoundingClientRect();
+	    rmclass(this.movee,"above");
+
+	    if (this.overstate === "insert") {
+		console.log(this.current_over);
+		insert_leaf($byid(this.current_over), this.movee);
+		saver.up();
+	    } else if (this.overstate === "shift") {
+		if (this.before)
+		    insert_before(this.movee,over);
+		else
+		    insert_after(this.movee,over);
+		insertf(this.movee, over);
+	    } else {console.log("no overstate");}
+	    tempmove(this.movee, {
+		x:current.x-44,
+		y:current.y-newpos.y+(this.before?40:0)
+	    });
+	    unmove(this.movee);
+	    saver.up();
+	    
+	    delete this.movee;
+	    check_hide(this.oldcontext.parent);
+	    this.over_cleanup(true);
+	};
 	restore_req(app, loginfo);
 
 	saver = new (function(_root,_loginfo){
