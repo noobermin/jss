@@ -17,22 +17,34 @@ input[type=input], input[type=password]{
     margin: 2px;
 }
 
-input[type=input].textinput{
-    border-top: 0px;
-    border-bottom: 1px solid rgba(170,170,170,0.55);
-    border-left: 0px;
-    border-right: 0px;
-    width: 200px;
-    font-size: medium;
+.textinput{
+	border: 0px;
+	padding: 0.1em;
+	width: 10em;
+	min-height: 1em;
+	font-size: medium;
+    word-wrap: break-word;
+}
+.textinput:focus{
+	-moz-user-focus: none;
+	-khtml-user-focus: none;
+	-webkit-user-focus: none;
+	user-focus: none;
+	
+	border-top: 0px;
+	border-bottom: 1px solid rgba(170,170,170,0.55);
+	border-left: 0px;
+	border-right: 0px;
+	transition: 0.2s ease-in;
 }
 #root{
-    minwidth: 500px;
+    min-width: 500px;
     padding: 20px;
     box-shadow: 2px 2px 5px 6px #222;
 }
 
 
-body, input[type=input], input[type=password]{
+body, input[type=password]{
     color: rgb(170,170,170);
     font-family: sans-serif;
 }
@@ -56,9 +68,9 @@ body, input[type=input], input[type=password]{
 
 .header {
     display: flex;
-    height: 25px;
+    min-height: 1em;
     flex-direction: row;
-    align-items: center;
+    align-items: top;
     left: 0px;
     bottom:  0px;
 }
@@ -171,9 +183,18 @@ body, input[type=input], input[type=password]{
 
 /* hidbutton */
 .childless .hidbutton {
+    width: 1em;
+    height: 0.3em;
+    top: 0.5em;
+    transition: 0.1s ease-in;
+}
+.childless .hidbutton .hid1 {
 	display: none;
 }
+
+
 .hidbutton {
+    top: 0em;
     position: relative;
     background: rgb(110,110,20);
 }

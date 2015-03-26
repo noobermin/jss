@@ -30,10 +30,10 @@ function mkbutton(id, classes, clickf){
     return $mkbutton(id,classes,clickf).el;}
 
 function mkinput(id, classes, val, inputf) {
-    var ret =
-    $mkel("input",
-	  {"id" :id,"value":val,"type" :"input"},
-	  classes,""
+    var ret = $mkdiv(
+	id,concat(["textinput"],classes), val
+    ).attr(
+	"contentEditable","true"
     ).evlis("input",function(){saver.up(0.2);});
     if (inputf) ret.evlis("input", inputf);
     return ret.el;
@@ -139,7 +139,7 @@ function make_child(parent,text,root,
 		//rm button
 		$mkbutton(
 		    myid+"x", "delbutton",
-		    function(){del(child,root);}
+		    function(){root.rm(child);}
 		).append(
 		    mkdiv(myid+"+_1","rm1"),mkdiv(myid+"+_2","rm2")
 		)
@@ -180,16 +180,10 @@ function hide_toggle(node, root) {
     }
 }
 
-function del(me,root) {
-    if ( typeof(me) == "string" || typeof(me) == "number")
-	me = byid(me);
-    root.rm(me);
-}
-
 function save(root,loginfo) {
     function save_r(el) {
 	return {
-	    text:     byid(idof(el)+'-input').value,
+	    text:     byid(idof(el)+'-input').innerHTML,
 	    children: getkids(el).map(function(c){ return save_r(c);})
 	};
     }
