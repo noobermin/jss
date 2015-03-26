@@ -34,7 +34,7 @@ function mkinput(id, classes, val, inputf) {
     $mkel("input",
 	  {"id" :id,"value":val,"type" :"input"},
 	  classes,""
-    ).evlis("input",function(){saver.up();});
+    ).evlis("input",function(){saver.up(0.2);});
     if (inputf) ret.evlis("input", inputf);
     return ret.el;
 }
@@ -150,8 +150,6 @@ function make_child(parent,text,root,
 		).evliss(
 		    "mousedown", function(e){return root.start_move(e);}
 		)
-	    ).append(
-		$mkdiv("herpaderp"+myid,"",myid)
 	    )
 	),
 	/*children*/
@@ -329,23 +327,16 @@ function notify(message){
 
 //obtain a list of visible
 function visiblekids(parent) {
-    function _visible_kids_bad(cur) {
-	var kids = getkids(cur);	
-	if (!kids.length) return [];
-	return concatv(kids, kids.filter(function(c){
-	    return kidsvisible(c);
-	}).map(_visible_kids));
-    }
-    function _visible_kids_dfs(cur) {
+    function _visible_kids(cur) {
 	var ret=[], kids=getkids(cur);
 	for (var i = 0; i < kids.length; ++i) {
 	    ret = ret.concat(kids[i]);
 	    if (kidsvisible(kids[i]))
-		ret = ret.concat(_visible_kids_dfs(kids[i]));
+		ret = ret.concat(_visible_kids(kids[i]));
 	}
 	return ret;
     }
-    return _visible_kids_dfs(parent);
+    return _visible_kids(parent);
 }
 
 function tempmove(el,dr,transtime) {
@@ -354,10 +345,6 @@ translateY("+dr.y+"px)\
 translateX("+dr.x+"px);";
     if (transtime) movestyle+="transition: "+transtime+"s ease-in;";
     el.style = movestyle;
-}
-
-const area = {
-    bottom:0,top:1,insert:2,invalid:3
 }
 
 function initapp(loginfo,suppressNotify) {
@@ -395,29 +382,7 @@ function initapp(loginfo,suppressNotify) {
 	    this.offset = {
 		x:e.clientX-tmp.x, y:e.clientY-tmp.y
 	    };
-	};
-	app.old_overarea = function(e) {
-	    var y = e.clientY;
-	    //getting the element over
-	    var i = Math.floor((y-58)/40);
-	    if (i < 0 || i > this.visible.length-1) return;
-	    var over = this.visible[i];
-	    var over_rect = over.getBoundingClientRect(),
-		head_rect = byid(idof(over)+"-header").getBoundingClientRect();
-	    var width = 4;
-	    var retarea;
-	    if (y > over_rect.bottom-width)
-		retarea = area.bottom;
-	    else if (y < over_rect.top+width)
-		retarea = area.top;
-
-	    else if (y > head_rect.top+width && y < head_rect.bottom-width)
-		retarea = area.insert;
-	    else
-		retarea = area.invalid;
-	    return {area:retarea, target:over, i:i};
-	}
-	
+	};	
 	const overlap = {
 	    notin:0, inbody:1, inhead:2, inall:3
 	}
@@ -436,6 +401,9 @@ function initapp(loginfo,suppressNotify) {
 		ret |= overlap.inhead;
 	    return ret;
 	}
+	//const area = {
+	//    bottom:0,top:1, insert:2,invalid:3
+	//}
 	app.overarea = function(e) {
 	    var x=e.clientX,y=e.clientY;
 	    var matches = this.visible.map(function(c){
@@ -454,17 +422,21 @@ function initapp(loginfo,suppressNotify) {
 	    if (i==-1) return;
 	    //getting the element over
 	    const width=4;
-	    var over = this.visible[i];//here
+	    var over = this.visible[i];
 	    if (y > over.body.bottom-width)
-		retarea = area.bottom;
+		retarea = this.overarea.bottom;
 	    else if (y < over.body.top+width)
-		retarea = area.top;
+		retarea = this.overarea.top;
 	    else if (y > over.head.top+width && y < over.head.bottom-width)
-		retarea = area.insert;
+		retarea = this.overarea.insert;
 	    else
-		retarea = area.invalid;
+		retarea = this.overarea.invalid;
 	    return {area:retarea, target:byid(over.id), i:i};
-	}
+	};
+	app.overarea.bottom=0;
+	app.overarea.top=1;
+	app.overarea.insert=2;
+	app.overarea.invalid=3;
 
 	app.move = function(e) {
 	    if(!this.movee) {
@@ -502,44 +474,19 @@ function initapp(loginfo,suppressNotify) {
 	    var over = this.overarea(e);
 	    if (!over || !this.valid_target(over.target)) return;
 	    switch (over.area) {
-	    case area.insert:
+	    case this.overarea.insert:
 		this.over_insert(over.target);
 		break;
-	    case area.top:
+	    case this.overarea.top:
 		this.over_shift(over.target, true);
 		break;
-	    case area.bottom:
+	    case this.overarea.bottom:
 		this.over_shift(over.target);
 		break;
 	    }
 	};
-	function unmove(el){
-	    setTimeout(function(){
-		el.style="transform: translateY(0px) translateX(0px); transition: 0.2s ease-in;";
-	    },1);
-	    setTimeout(function(){
-		el.style="";
-	    },300);
-
-	}
 	app.valid_target = function (obj) {
 	    return !has(this.undropable, idof(obj));
-	};
-	app.over_shift_old = function(el,i,inclusive) {
-	    var id=idof(el);
-	    if (this.overstate === "shift"
-		&& (this.current_over === id || id === "root"))
-		return;
-	    if (!inclusive)++i;
-	    var under = this.visible.slice(i,this.visible.length);
-	    this.over_cleanup();
-	    under.map(function(c){
-		addclass(c,"shift-down");
-	    });
-	    this.overstate = "shift";
-	    this.current_over = idof(el);
-	    this.shifted = under;
-	    this.before  = inclusive;
 	};
 	app.over_shift = function(el, inclusive) {
 	    var id=idof(el);
@@ -571,26 +518,11 @@ function initapp(loginfo,suppressNotify) {
 		if(!instant) {
 		    temp.addclass("shrink");
 		    setTimeout(function(){
-			console.log(temp.el.parentElement);
 			temp.el.parentElement.removeChild(temp.el);
 		    },200);
 		} else {
 		    temp.el.parentElement.removeChild(temp.el);
 		}
-			   /*
-		if (!instant) {
-		    undofunc = (function(c){
-			$(c).rmclass("shift-down").addclass("shift-back-up");
-			setTimeout(function(){
-			    rmclass(c,"shift-back-up")
-			},200);
-		    });
-		} else {
-		    undofunc = (function(c){
-			rmclass(c,"shift-down");
-		    });
-		}
-		this.shifted.map(undofunc);*/
 		delete this.before;
 	    } else if (this.overstate === "insert") {
 		var cur = $byid(this.current_over);
@@ -618,7 +550,6 @@ function initapp(loginfo,suppressNotify) {
 	    rmclass(this.movee,"above");
 
 	    if (this.overstate === "insert") {
-		console.log(this.current_over);
 		insert_leaf($byid(this.current_over), this.movee);
 		saver.up();
 	    } else if (this.overstate === "shift") {
@@ -626,15 +557,22 @@ function initapp(loginfo,suppressNotify) {
 		    insert_before(this.movee,over);
 		else
 		    insert_after(this.movee,over);
-		insertf(this.movee, over);
-	    } else {console.log("no overstate");}
+	    } else {
+		console.log("no overstate");
+	    }
 	    tempmove(this.movee, {
 		x:current.x-44,
 		y:current.y-newpos.y+(this.before?40:0)
 	    });
-	    unmove(this.movee);
+	    var tmp = this.movee;
+	    setTimeout(function(){
+		tmp.style=
+		    "transform: translateY(0px) translateX(0px); transition: 0.2s ease-in;";
+	    },1);
+	    setTimeout(function(){
+		tmp.style="";
+	    },300);
 	    saver.up();
-	    
 	    delete this.movee;
 	    check_hide(this.oldcontext.parent);
 	    this.over_cleanup(true);
@@ -643,12 +581,13 @@ function initapp(loginfo,suppressNotify) {
 
 	saver = new (function(_root,_loginfo){
 	    this.num=0;
-	    this.up = function() {
-		this.num+=1;
-		if ( this.num > 20 ) {
+	    this.up = function(val) {
+		if (!val) val=1;
+		this.num+=val;
+		if ( this.num > 10 ) {
 		    console.log("auto-saving...");
 		    save(_root,_loginfo);
-		    this.num=0;
+		    this.num = 0;
 		}
 	    };
 	})(app.el,loginfo);
