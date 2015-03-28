@@ -59,10 +59,19 @@ function mkpush_button(id,classes,inner,clickf) {
     return ret.el;
 }
 
-function insert_leaf(parent,el,skipHide){
+function select_contents(el) {
+    el = $toel(el);
+    var r = document.createRange();
+    r.selectNodeContents(el);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(r);
+}
+
+function insert_leaf(parent,el,skipHide,noFocus){
     parent = $toel(parent);
     $byid(idof(parent)+"-children").append(el);
-    focus(el);
+    if (!noFocus) focus(el);
     /*checking if first child*/
     if (getkids(parent).length > 0 && !skipHide)
 	rmclass(parent, "childless");
@@ -71,7 +80,9 @@ function insert_leaf(parent,el,skipHide){
 
 function focus(id){
     if (typeof id === "object") id = idof(id);
-    byid(id+"-input").focus();
+    var el = byid(id+"-input");
+    el.focus();
+    select_contents(el);
 }
 
 function _visible(hidestate) {
@@ -104,8 +115,7 @@ function hide_kids(id) {
 }
 
 function make_child(parent,text,root,
-		    skipHide,noanimate)
-{
+		    skipHide,noAnimate,noFocus) {
     ids++;
     var myid=ids;
     var child = $mkdiv(myid,"node").append(
@@ -116,7 +126,7 @@ function make_child(parent,text,root,
 	    /*hide button*/
 	    $mkbutton(
 		myid+"-","hidbutton",
-		function(){hide_toggle(child,root);}
+		function(){hide_toggle(child);}
 	    ).append(
 		mkdiv(myid+"-"+"_1","hid1"), mkdiv(myid+"-"+"_2","hid2")
 	    )
@@ -139,7 +149,7 @@ function make_child(parent,text,root,
 		//rm button
 		$mkbutton(
 		    myid+"x", "delbutton",
-		    function(){root.rm(child);}
+		    function(){del(child,skipHide);}
 		).append(
 		    mkdiv(myid+"+_1","rm1"),mkdiv(myid+"+_2","rm2")
 		)
@@ -160,17 +170,29 @@ function make_child(parent,text,root,
     ).addclass(
 	"childless"
     ).el;
-    if (!noanimate) {
+    if (!noAnimate) {
 	addclass(child,"new");
 	setTimeout(function(){rmclass(child,"new");},300);
     }
-    insert_leaf(parent,child,skipHide);
+    insert_leaf(parent,child,skipHide,noFocus);
     return child;
 }
 
-function hide_toggle(node, root) {
+function del(el,skipHide) {
+    var parent = parentof(el);
+    var container = el.parentElement;
+    addclass(el,"erase");
+    setTimeout(function(){
+	container.removeChild(el);
+	if(!skipHide)
+	    check_hide(parent);
+    },300);
+}
+
+function hide_toggle(node) {
     var id = idof(node);
     var hbtn = byid(id+"-");
+    if ($(node).hasclass("childless")) return;
     if (_visible(hbtn)) {
 	hide_kids(node);
 	$(hbtn).addclass("hidbutton-show");
@@ -221,7 +243,8 @@ function restore_req(root,loginfo) {
 
 function restore(root, data) {
     function restore_r(node,cur,ignorehide) {	
-	var child  = make_child(node, cur.text, root, ignorehide,true);
+	var child  = make_child(node, cur.text, root,
+				ignorehide, true, true);
 	cur.children.map(function(c){
 	    restore_r(child, c);
 	});
@@ -526,15 +549,6 @@ function initapp(loginfo,suppressNotify) {
 	    }
 	    this.overstate = "none";
 	    this.current_over = null;
-	};
-	app.rm = function(el) {
-	    var parent = parentof(el);
-	    var container = el.parentElement;
-	    addclass(el,"erase");
-	    setTimeout(function(){
-		container.removeChild(el);
-		check_hide(parent);
-	    },300);
 	};
 	app.end_move = function(e) {
 	    if(!this.movee) return;
