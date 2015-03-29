@@ -7,6 +7,7 @@
 }
 
 body{
+	max-height: none;
 	background: rgb(40,40,40);
 }
 
@@ -36,6 +37,7 @@ input[type=input], input[type=password] {
 }
 #root {
 	min-width: 500px;
+	max-height: none;
 	padding: 20px;
 	box-shadow: 2px 2px 5px 6px #222;
 }
@@ -54,7 +56,7 @@ body, input[type=password]{
 }
 
 .visible{
-    max-height: 400px;
+    max-height: 1000px;
     transition: 0.3s ease-out;
     -webkit-transition: 0.3s ease-out;
 }
