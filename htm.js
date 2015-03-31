@@ -14,11 +14,18 @@ slice = mkarraycall("slice");
 function has(arraylike,ino){return filter(arraylike,function(c){return c == ino}).length > 0;}
 function last(arraylike){ return arraylike[arraylike.length-1]; }
 function setlast(arraylike,d){ arraylike[arraylike.length-1]=d; }
-function findfirst(arraylike, val) {
+function findfirst(arraylike, func) {
     var arr = slice(arraylike);
+    if (func.constructor !== Function) {
+	var val=func;
+	func = (function(c){return c==val;});
+    }
     for(var i=0; i < arr.length; ++i)
-	if (arr[i] == val) return i;
+	if (func(arr[i])) return i;
     return -1;
+}
+function concatv(arraylike,lists) {
+    return concat.apply(concat,concat([arraylike],lists));
 }
 
 //aliases
