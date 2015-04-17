@@ -30,6 +30,7 @@ function concatv(arraylike,lists) {
 
 //aliases
 function byid(id){return document.getElementById(id);}
+function byclass(clas) { return slice(document.getElementsByClassName(clas)); }
 function idof(el){return el.id;}
 
 //DOM stuff
@@ -97,20 +98,41 @@ function evliss() {
 
 //insertion convienience
 function insert_after(el, before) {
-    is$(el)     && (el = el.el);
-    is$(before) && (before = before.el);
+    el = $toel(el);
+    before = $toel(before);
     before.parentElement.insertBefore(el,before.nextSibling);
 }
 
 function insert_before(el, after) {
     el = $toel(el);
-    after = $toel(el);
+    after = $toel(after);
     after.parentElement.insertBefore(el,after);
 }
 //pruner
 function prune(el) {
     while (el.hasChildNodes()) el.removeChild(el.lastChild);
     return el;
+}
+//
+function rmel(el,tempclass,delay,f) {
+    if(!el) return;
+    el = $toel(el);
+    if (tempclass && !delay) {
+	delay = tempclass; delete tempclass;
+    }
+    if (delay) {
+	if (tempclass) addclass(el,tempclass);
+	setTimeout(function() {
+	    if (el.parentElement)
+		el.parentElement.removeChild(el);
+	    if (f) f();
+	},delay);
+    } else {
+	if (el.parentElement) {
+	    el.parentElement.removeChild(el);
+	}
+    }
+    
 }
 
 function inner(el,innert) {
@@ -175,6 +197,11 @@ _$.prototype.insert_before = function(el) {
 }
 _$.prototype.inner = function(innert) {
     inner(this.el,innert);
+    return this;
+}
+_$.prototype.rmel = function(tempclass, delay) {
+    rmel(this.el, tempclass, delay);
+    delete this.el;
     return this;
 }
 //other goodies
