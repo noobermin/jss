@@ -357,11 +357,18 @@ function visiblekids(parent) {
 }
 
 function tempmove(el,dr,transtime) {
-    var movestyle ="transform: \
-translateY("+dr.y+"px)\
-translateX("+dr.x+"px);";
-    if (transtime) movestyle+="transition: "+transtime+"s ease-in;";
-    el.style = movestyle;
+    var movestyle ="translateX("+dr.x+"px) translateY("+dr.y+"px)";
+    if (el.style.webkitTransform)
+	el.style.webkitTransform = movestyle;
+    else
+	el.style.transform = movestyle;
+    if (transtime) {
+	movestyle=transtime+"s ease-in"
+	if (el.style.webkitTransition)
+	    el.style.webkitTransition = movestyle;
+	else
+	    el.style.transition = movestyle;
+    }
 }
 
 function initapp(loginfo,suppressNotify) {
@@ -396,21 +403,23 @@ function initapp(loginfo,suppressNotify) {
 	app.start_move = function(e) {
 	    this.possible = nodefor(e.target);
 	    var tmp = this.possible.getBoundingClientRect();
+	    console.log(tmp);
 	    this.offset = {
-		x:e.clientX-tmp.x, y:e.clientY-tmp.y
+		x:e.clientX-tmp.left, y:e.clientY-tmp.top
 	    };
 	};	
 	const overlap = {
 	    notin:0, inbody:1, inhead:2, inall:3
 	}
 	function insidebox(x, y, body, head) {
+	    /*
 	    if (y.constructor && y.constructor === DOMRect) {
 		head = body;
 		body = y;
 		var tmp = x;
 		x = tmp.x;
 		y = tmp.y;
-	    }
+	    }*/
 	    var ret=0;
 	    if(y > body.top && y < body.bottom && x > body.left && y < body.right)
 		ret |= overlap.inbody;
@@ -533,8 +542,9 @@ function initapp(loginfo,suppressNotify) {
 		var undofunc;
 		var temp = $byid("temp");
 		if(!instant) {
-		    temp.addclass("shrink");
+		    temp.addclass("erase");
 		    setTimeout(function(){
+			console.log(temp.el.parentElement);
 			temp.el.parentElement.removeChild(temp.el);
 		    },200);
 		} else {
@@ -553,7 +563,7 @@ function initapp(loginfo,suppressNotify) {
 	app.end_move = function(e) {
 	    if(!this.movee) return;
 	    var current = this.movee.getBoundingClientRect();
-	    var over = $byid(this.current_over).el;
+	    var over = byid(this.current_over);
 	    var newpos = over.getBoundingClientRect();
 	    rmclass(this.movee,"above");
 
@@ -574,8 +584,10 @@ function initapp(loginfo,suppressNotify) {
 	    });
 	    var tmp = this.movee;
 	    setTimeout(function(){
-		tmp.style=
-		    "transform: translateY(0px) translateX(0px); transition: 0.2s ease-in;";
+		tmp.style.transform = "";
+		tmp.style.webkitTransform = "";
+		tmp.style.transition = "";
+		tmp.style.webkitTransition = "";
 	    },1);
 	    setTimeout(function(){
 		tmp.style="";

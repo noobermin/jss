@@ -1,6 +1,7 @@
 .node {
 	position: relative;
 	margin-top: 15px;
+  min-height: 25px;
 	margin-left: 1em;
 	display: block;
 	width: 400px;
@@ -361,49 +362,26 @@ body, input[type=password]{
 /*
  * Shifting due to inserting and reordering
  */
-.shift-down{
-    transform: translateY(40px);
-    transition: 0.2s ease-in;
-}
-
-.shift-back-up{
-	transform: translateY(0px);
-	transition: 0.2s ease-in;
-}
-
 .erase{
-	animation-name: scaleup;
-	-webkit-animation-name: scaleup;
-	animation-iteration-count: 1;
-	-webkit-animation-iteration-count: 1;
-	animation-timing-function: ease-in;
-	-webkit-animation-timing-function: ease-in;
-	animation-duration: 0.3s;
-	-webkit-animation-duration: 0.3s;
-	animation-fill-mode: forwards;
-	-webkit-animation-fill-mode: forwards;
+  max-height: 0px;
+  margin-top: 0px;
+	transition: 0.3s ease-in;
+  -webkit-transition: 0.3s ease-in;
 	overflow: hidden;
 }
+
 .new{
-	animation-name: scaledown;
-	-webkit-animation-name: scaledown;
-	animation-iteration-count: 1;
-	-webkit-animation-iteration-count: 1;
-	animation-timing-function: ease-in;
-	-webkit-animation-timing-function: ease-in;
-	animation-duration: 0.1s;
-	-webkit-animation-duration: 0.1s;
-	animation-fill-mode: forwards;
-	-webkit-animation-fill-mode: forwards;
-	overflow: hidden;
+	animation: scaledown 0.3s ease-in;
+	-webkit-animation: scaledown 0.3s ease-in;
 }
+
 @keyframes scaleup{
 	0% {
 		max-height:25px;
 		margin-top:15px;
 	}
 	100%{
-		max-height: 0;
+		max-height: 0px;
 		margin-top:0px;
 	}
 }
@@ -417,6 +395,18 @@ body, input[type=password]{
 		margin-top:15px;
 	}
 }
+@-webkit-keyframes scaledown{
+	0%{
+		max-height: 0;
+		margin-top:0px;
+	}
+	100% {
+		max-height:25px;
+		margin-top:15px;
+	}
+}
+
+
 
 
 .move-back{
@@ -449,5 +439,7 @@ body, input[type=password]{
 }
 .shrink {
 	transform: scaleY(0.0);
-	transition: 0.2s ease-in;
+  -webkit-transform: scaleY(0.0);
+	transition: 2.0s ease-in;
+  -webkit-transition: 2.0s ease-in;
 }
