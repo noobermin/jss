@@ -71,6 +71,15 @@ function addclass(el) {
     }
     return el;
 }
+function addtempclass(el){
+    var args = slice(arguments,1,arguments.length-1);
+    var time = arguments[arguments.length-1];
+    addclass(el, args);
+    setTimeout(function(){
+	rmclass(el,args);
+    },time);
+}
+
 function hasclass(el){
     return el.classList.contains.apply(el.classList,
 				       slice(arguments,1,arguments.length));
@@ -94,8 +103,8 @@ function insert_after(el, before) {
 }
 
 function insert_before(el, after) {
-    is$(el)     && (el = el.el);
-    is$(after) && (after = after.el);
+    el = $toel(el);
+    after = $toel(el);
     after.parentElement.insertBefore(el,after);
 }
 //pruner
@@ -104,7 +113,20 @@ function prune(el) {
     return el;
 }
 
-//my super type
+function inner(el,innert) {
+    el = $toel(el);
+    if(!innert) return el.innerHTML;
+    else {
+	el.innerHTML = innert;
+	console.log("success");
+	return el;
+    }
+}
+
+
+//
+//my super element wrapper type
+//
 function _$(el){
     this.el = el;
 }
@@ -122,6 +144,10 @@ _$.prototype.addclass = function() {
     addclass.apply(addclass, concat([this.el],slice(arguments)));
     return this;
 };
+_$.prototype.addtempclass = function() {
+    addtempclass.apply(addtempclass, concat([this.el], slice(arguments)));
+    return this;
+}
 _$.prototype.rmclass = function() {
     rmclass.apply(rmclass, concat([this.el],slice(arguments)));
     return this;
@@ -145,6 +171,10 @@ _$.prototype.attr  = function () {
 };
 _$.prototype.insert_before = function(el) {
     insert_before(this.el, before);
+    return this;
+}
+_$.prototype.inner = function(innert) {
+    inner(this.el,innert);
     return this;
 }
 //other goodies
