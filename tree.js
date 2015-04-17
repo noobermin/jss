@@ -182,11 +182,10 @@ function del(el,skipHide) {
     var parent = parentof(el);
     var container = el.parentElement;
     addclass(el,"erase");
-    setTimeout(function(){
-	container.removeChild(el);
+    $(el).rmel("erase",300,function(){
 	if(!skipHide)
 	    check_hide(parent);
-    },300);
+    });
 }
 
 function hide_toggle(node) {
@@ -403,7 +402,6 @@ function initapp(loginfo,suppressNotify) {
 	app.start_move = function(e) {
 	    this.possible = nodefor(e.target);
 	    var tmp = this.possible.getBoundingClientRect();
-	    console.log(tmp);
 	    this.offset = {
 		x:e.clientX-tmp.left, y:e.clientY-tmp.top
 	    };
@@ -538,18 +536,11 @@ function initapp(loginfo,suppressNotify) {
 	    this.current_over = idof(el);
 	};
 	app.over_cleanup = function(instant) {
+	    //removing temp from shifting
 	    if (this.overstate === "shift") {
-		var undofunc;
-		var temp = $byid("temp");
-		if(!instant) {
-		    temp.addclass("erase");
-		    setTimeout(function(){
-			console.log(temp.el.parentElement);
-			temp.el.parentElement.removeChild(temp.el);
-		    },200);
-		} else {
-		    temp.el.parentElement.removeChild(temp.el);
-		}
+		byclass("temp").map(function(el) {
+		    $(el).rmel("erase",300);
+		});
 		delete this.before;
 	    } else if (this.overstate === "insert") {
 		var cur = $byid(this.current_over);

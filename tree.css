@@ -1,7 +1,6 @@
 .node {
 	position: relative;
 	margin-top: 15px;
-  min-height: 25px;
 	margin-left: 1em;
 	display: block;
 	width: 400px;
@@ -362,17 +361,16 @@ body, input[type=password]{
 /*
  * Shifting due to inserting and reordering
  */
-.erase{
-  max-height: 0px;
-  margin-top: 0px;
-	transition: 0.3s ease-in;
-  -webkit-transition: 0.3s ease-in;
+.erase {
+  animation: scaleup 0.3s ease-in;
+  -webkit-animation: scaleup 0.3s ease-in;
 	overflow: hidden;
 }
 
 .new{
-	animation: scaledown 0.3s ease-in;
-	-webkit-animation: scaledown 0.3s ease-in;
+	animation: scaledown 0.1s ease-in;
+	-webkit-animation: scaledown 0.1 ease-in;
+	overflow: hidden;
 }
 
 @keyframes scaleup{
@@ -385,6 +383,18 @@ body, input[type=password]{
 		margin-top:0px;
 	}
 }
+@-webkit-keyframes scaleup{
+	0%{
+  
+		max-height: 25px;
+		margin-top: 15px;
+	}
+	100% {
+		max-height: 0px;
+		margin-top: 0px;
+	}
+}
+
 @keyframes scaledown{
 	0%{
 		max-height: 0;
@@ -440,6 +450,6 @@ body, input[type=password]{
 .shrink {
 	transform: scaleY(0.0);
   -webkit-transform: scaleY(0.0);
-	transition: 2.0s ease-in;
-  -webkit-transition: 2.0s ease-in;
+	transition: 0.3s ease-in;
+  -webkit-transition: 0.3s ease-in;
 }
