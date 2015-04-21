@@ -13,7 +13,7 @@ var mkfileread   = nde.mkfileread,
 var users = {
     "yidie"     : ["pancakes",1],
     "noobermin" : ["1234",2],
-    "test"      : ["test",3]
+    "test"      : ["test",0]
 };
 
 function check_login(username, password) {
