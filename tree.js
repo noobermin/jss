@@ -410,38 +410,26 @@ function initapp(loginfo,suppressNotify) {
 	    notin:0, inbody:1, inhead:2, inall:3
 	}
 	function insidebox(x, y, body, head) {
-	    /*
-	    if (y.constructor && y.constructor === DOMRect) {
-		head = body;
-		body = y;
-		var tmp = x;
-		x = tmp.x;
-		y = tmp.y;
-	    }*/
 	    var ret=0;
-	    if(y > body.top && y < body.bottom && x > body.left && y < body.right)
+	    if(y > body.top && y < body.bottom && x > body.left && x < body.right)
 		ret |= overlap.inbody;
-	    if(y > head.top && y < head.bottom && x > head.left && y < head.right)
+	    if(y > head.top && y < head.bottom && x > head.left && x < head.right)
 		ret |= overlap.inhead;
 	    return ret;
 	}
-	//const area = {
-	//    bottom:0,top:1, insert:2,invalid:3
-	//}
 	app.overarea = function(e) {
-	    var x=e.clientX,y=e.clientY;
 	    var matches = this.visible.map(function(c){
-		return insidebox(e.clientX, e.clientY, c.body,c.head);
+		    return insidebox(e.clientX, e.clientY, c.body,c.head);
 	    });
 	    var head=true;
 	    var i = findfirst(matches, function(c){
-		return c & overlap.inhead;
+		    return c & overlap.inhead;
 	    });
 	    if (i==-1) {
-		i = findfirst(matches, function(c){
-		    return c & overlap.inbody;
-		});
-		head = false;
+		    i = findfirst(matches, function(c){
+		        return c & overlap.inbody;
+		    });
+		    head = false;
 	    }
 	    if (i==-1) return;
 	    //getting the element over
@@ -455,7 +443,7 @@ function initapp(loginfo,suppressNotify) {
 		retarea = this.overarea.insert;
 	    else
 		retarea = this.overarea.invalid;
-	    return {area:retarea, target:byid(over.id), i:i};
+	    return {area:retarea, target:byid(over.id)};
 	};
 	app.overarea.bottom=0;
 	app.overarea.top=1;
