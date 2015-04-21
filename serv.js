@@ -27,7 +27,6 @@ var site = {
     '/tree.html': mkfileread("text/html"),
     '/tree.js':   mkfileread("text/plain"),
     '/jss/htm.js':    mkfileread("text/plain"),
-    '/cookies.js':mkfileread("text/plain"),
     '/tree.css':  mkfileread("text/css"),
     '/shapes.css':  mkfileread("text/css"),
     '/test.html':  mkfileread("text/html"),
