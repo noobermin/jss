@@ -180,11 +180,8 @@ function make_child(parent,text,root,
 
 function del(el,skipHide) {
     var parent = parentof(el);
-    var container = el.parentElement;
-    addclass(el,"erase");
-    $(el).rmel("erase",300,function(){
-	if(!skipHide)
-	    check_hide(parent);
+    $(el).rmel("erase", 300, function(){
+	    if(!skipHide)check_hide(parent);
     });
 }
 
@@ -193,11 +190,11 @@ function hide_toggle(node) {
     var hbtn = byid(id+"-");
     if ($(node).hasclass("childless")) return;
     if (_visible(hbtn)) {
-	hide_kids(node);
-	$(hbtn).addclass("hidbutton-show");
+	    hide_kids(node);
+	    $(hbtn).addclass("hidbutton-show");
     } else {
-	show_kids(node);
-	$(hbtn).rmclass("hidbutton-show");
+	    show_kids(node);
+	    $(hbtn).rmclass("hidbutton-show");
     }
 }
 
@@ -418,7 +415,7 @@ function initapp(loginfo,suppressNotify) {
 	        return ret;
 	    }
 	    app.overarea = function(e) {
-            var x = e.clientX, y=e.clientY
+            var x = e.clientX, y=e.clientY;
 	        var matches = this.visible.map(function(c){
 		        return insidebox(x, y, c.body, c.head);
 	        });

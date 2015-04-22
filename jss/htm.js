@@ -124,7 +124,7 @@ function rmel(el,tempclass,delay,f) {
 	if (tempclass) addclass(el,tempclass);
 	setTimeout(function() {
 	    if (el.parentElement)
-		el.parentElement.removeChild(el);
+		    el.parentElement.removeChild(el);
 	    if (f) f();
 	},delay);
     } else {
@@ -199,8 +199,8 @@ _$.prototype.inner = function(innert) {
     inner(this.el,innert);
     return this;
 }
-_$.prototype.rmel = function(tempclass, delay) {
-    rmel(this.el, tempclass, delay);
+_$.prototype.rmel = function(tempclass, delay,f) {
+    rmel(this.el, tempclass, delay,f);
     delete this.el;
     return this;
 }
