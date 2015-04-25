@@ -478,8 +478,9 @@ function initapp(loginfo,suppressNotify) {
 		            
 		        }
 	        }
-	        var dr = {x:e.clientX-this.offset.x-20,
-		              y:e.clientY-this.offset.y-20};
+            var offset = byid("root").getBoundingClientRect();
+	        var dr = {x:e.clientX-offset.left-20,
+		              y:e.clientY-offset.top-20};
 	        tempmove(this.movee,dr);
 	        var over = this.overarea(e);
 	        if (!over || !this.valid_target(over.target)) return;

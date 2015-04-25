@@ -440,6 +440,7 @@ body, input[type=password]{
 	left: 0px;
 	box-shadow: 2px 2px 5px 6px #222;
 	background: rgb(40,40,40);
+  opacity: 0.7;
 }
 
 .temp {
