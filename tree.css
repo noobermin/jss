@@ -1,3 +1,13 @@
+body {
+	max-height: none;
+}
+
+input[type=input], input[type=password] {
+	background: transparent;
+	border: 1px solid;
+	margin: 2px;
+}
+
 .node {
 	position: relative;
 	margin-top: 15px;
@@ -6,20 +16,9 @@
 	width: 400px;
 }
 
-body{
-	max-height: none;
-	background: rgb(40,40,40);
-}
-
-input[type=input], input[type=password] {
-	background: transparent;
-	border: 1px solid rgb(60,60,60);
-	margin: 2px;
-}
-
 .textinput{
 	border-top: 0px;
-	border-bottom: 1px solid rgba(170,170,170,0.55);
+	border-bottom: 1px solid;
 	border-left: 0px;
 	border-right: 0px;
 	padding: 0.1em;
@@ -29,22 +28,24 @@ input[type=input], input[type=password] {
 	word-wrap: break-word;
 	transition: 0.31s linear;
 }
-
-.textinput:focus{
+.textinput:focus {
 	outline: 0px solid transparent;
-	border-bottom: 3px solid rgba(170,170,170,0.55);
+	border-bottom: 3px solid;
 	transition: 0.3s linear;
 }
 #root {
 	min-width: 500px;
+  width: 500px;
+  margin: 0 auto;
 	max-height: none;
 	padding: 20px;
-	box-shadow: 2px 2px 5px 6px #222;
+}
+.root-header {
+	height: 30px;
+  margin: 0 auto;
 }
 
-
-body, input[type=password]{
-    color: rgb(170,170,170);
+body, input{
     font-family: sans-serif;
 }
 
@@ -54,15 +55,10 @@ body, input[type=password]{
     transition: 0.3s linear;
     -webkit-transition: 0.3s linear;
 }
-
 .visible{
     max-height: 1000px;
     transition: 0.3s ease-out;
     -webkit-transition: 0.3s ease-out;
-}
-
-.hidbutton:after, .hidbutton-show:after, .hidbutton-show:before{
-    background: rgb(160,160,160);
 }
 
 .header {
@@ -73,9 +69,10 @@ body, input[type=password]{
     left: 0px;
     bottom:  0px;
 }
-.root-header {
-	height: 30px;
-}
+
+/*
+ * buttons
+ */
 
 .button{
     -moz-user-select: none;
@@ -85,191 +82,7 @@ body, input[type=password]{
     text-align: center;
     cursor: pointer;
 }
-
-.active-btn{
-    display: flex;
-    width: 18px;
-    height: 18px;
-    transition: 0.5s ease-in-out;
-    -webkit-transition: 0.5s ease-in-out;
-}
-
-.butbox {
-    display: flex;
-    flex-direction: row;
-    position: relative;
-    height: 1em;
-    /*left: -2px;
-    top: -0;*/
-    transition: 0.1s;
-    -webkit-transition: 0.1s;
-    z-index: 1;
-}
-
-.butbox:hover{
-    transform: scale(1.6);
-    -webkit-transform: scale(1.6);
-    transition: 0.1s linear;
-    -webkit-transition: 0.1s linear;
-}
-
-.butbox:hover .button{
-    position: relative;
-    margin-left: 5px;
- }
-
-.butbox:hover .button:hover{
-    transform: scale(1.1);
-    -webkit-transform: scale(1.1);
-    transition: 0.2s ease-in-out;
-    -webkit-transition: 0.2s ease-in-out;
-}
-
-.addbutton {
-    background: rgb(50,99,0);
-}
-
-.butbox:hover .addbutton .add1{
-    background: rgb(24,160,14);
-    position: absolute;
-    top: 39.5%;
-    left: 10%;
-    width: 80%;
-    height: 20%;
-    z-index: 2;
-}
-.butbox:hover .addbutton .add2{
-    background: rgb(24,160,14);
-    position: absolute;
-    top: 39.5%;
-    left: 10%;
-    width: 80%;
-    height: 20%;
-    z-index: 2;
-    transform: rotate(-90deg);
-}
-
-
-/**/
-.delbutton {
-    background: rgb(99,20,10);
-}
-
-.butbox:hover .delbutton .rm1{
-    background: rgb(160,24,14);
-    position: absolute;
-    top: 39.5%;
-    left: 6%;
-    width: 90%;
-    height: 20%;
-    transform: rotate(45deg);
-    z-index: 2;
-}
-.butbox:hover .delbutton .rm2{
-    background: rgb(160,24,14);
-    position: absolute;
-    top: 39.5%;
-    left: 6%;
-    width: 90%;
-    height: 20%;
-    z-index: 2;
-    transform: rotate(-45deg);
-}
-
-/* hidbutton */
-.childless .hidbutton {
-    width: 1em;
-    height: 0.3em;
-    top: 0.5em;
-    transition: 0.1s ease-in;
-}
-.childless .hidbutton .hid1 {
-	display: none;
-}
-
-
-.hidbutton {
-    top: 0em;
-    position: relative;
-    background: rgb(110,110,20);
-}
-
-.hidbutton .hid1 {
-    background: rgb(160,160,20);
-    position: absolute;
-    top: 39.5%;
-    left: 10%;
-    width: 80%;
-    height: 20%;
-    z-index: 2;
-}
-
-.hidbutton .hid2 {
-    display:none;
-}
-
-
-.hidbutton-show .hid2{
-    background: rgb(160,160,20);
-    display: block;
-    position: absolute;
-    top: 39.5%;
-    left: 10%;
-    width: 80%;
-    height: 20%;
-    z-index: 2;
-    transform: rotate(-90deg);
-}
-
-.dragbutton {
-    background: rgb(20,00,99);
-}
-
-
-/*
-// modal
-*/
-
-.modal:before {
-    content: "";
-    display: block;
-    background: #333;
-    position: fixed;
-    top:0; left: 0; right: 0; bottom:0;
-    z-index: 10;
-    animation-name: fadein;
-    -webkit-animation-name: fadein;
-    animation-iteration-count: 1;
-    -webkit-animation-iteration-count: 1;
-    animation-timing-function: ease-out;
-    -webkit-animation-timing-function: ease-out;
-    animation-duration: 0.4s;
-    -webkit-animation-duration: 0.4s;
-    animation-fill-mode: forwards;
-    -webkit-animation-fill-mode: forwards;
-}
-
-
-.modal-diag {
-    position: fixed;
-    top: 20%;
-    left: 50%;
-    margin-left:-180px;
-    padding: 20px;
-    border-radius: 2px;
-    width: 360px;
-    box-shadow: 2px 2px 5px 6px #222;
-    /*margin-left: auto;*/
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    z-index: 11;
-    opacity: 1.0;
-}
-
 .pushbtn{
-    background: rgb(70,70,70);
     border: 0px;
     border-radius: 2px;
     color: rgb(150,150,150);
@@ -280,12 +93,122 @@ body, input[type=password]{
     min-width: 80px;
 }
 
-.pushbtn:hover{
-	color: rgb(190,190,190);
+
+.butbox {
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    height: 1.25em;
+    transition: 0.1s;
+    -webkit-transition: 0.1s;
+    z-index: 1;
 }
 
-.pushbtn:active{
-    background: rgb(60,60,60);
+.butbox:hover{
+    transform: scale(1.5);
+    -webkit-transform: scale(1.5);
+    transition: 0.1s linear;
+    -webkit-transition: 0.1s linear;
+}
+
+.butbox:hover .button{
+    position: relative;
+    margin-left: 0.35em;
+ }
+
+.butbox:hover .button:hover{
+    transform: scale(1.1);
+    -webkit-transform: scale(1.1);
+    transition: 0.2s ease-in-out;
+    -webkit-transition: 0.2s ease-in-out;
+}
+
+.active-btn{
+    display: flex;
+    width: 1.25em;
+    height: 1.25em;
+    transition: 0.5s ease-in-out;
+    -webkit-transition: 0.5s ease-in-out;
+}
+
+/*add button decor*/
+.butbox:hover .addbutton .add1,
+.butbox:hover .addbutton .add2{
+    position: absolute;
+    top: 39.5%;
+    left: 10%;
+    width: 80%;
+    height: 20%;
+    z-index: 2;
+}
+.butbox:hover .addbutton .add2{
+    transform: rotate(-90deg);
+}
+/*del button decor*/
+.butbox:hover .delbutton .rm1,
+.butbox:hover .delbutton .rm2{
+    position: absolute;
+    top: 39.5%;
+    left: 6%;
+    width: 90%;
+    height: 20%;
+    z-index: 2;
+}
+.butbox:hover .delbutton .rm1{
+    transform: rotate(45deg);
+    -webkit-transform : rotate(45deg);
+}
+.butbox:hover .delbutton .rm2{
+    transform: rotate(-45deg);
+    -webkit-transform : rotate(-45deg);
+}
+
+/* hide button decor*/
+.childless .hidbutton {
+    width: 1em;
+    height: 0.3em;
+    top: 0.5em;
+    transition: 0.1s ease-in;
+}
+.childless .hidbutton .hid1 {
+	display: none;
+}
+
+.hidbutton {
+    top: 0em;
+    position: relative;
+
+}
+.hidbutton .hid1,
+.hidbutton.hidbutton-show .hid2{
+    position: absolute;
+    top: 39.5%;
+    left: 10%;
+    width: 80%;
+    height: 20%;
+    z-index: 2;
+}
+.hidbutton:not(.hidbutton-show) .hid2 {
+    display:none;
+}
+.hidbutton-show .hid2{
+    transform: rotate(-90deg);
+}
+
+
+/*
+ * modal
+ */
+
+.modal:before {
+    content: "";
+    display: block;
+    background: #333;
+    position: fixed;
+    top:0; left: 0; right: 0; bottom:0;
+    z-index: 9;
+    animation: fadein 0.4s ease-out 0s 1 normal forwards;
+    -webkit-animation: fadein 0.4s ease-out 0s 1 normal forwards;
 }
 
 
@@ -300,28 +223,35 @@ body, input[type=password]{
     justify-content: center;
 }
 
+.modal-diag {
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    margin-left:-12.5em;
+    padding: 2em 1em;
+    border-radius: 2px;
+    width: 25em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    z-index: 12;
+    opacity: 1.0;
+}
+
+
 .modal-diag.drop {
-    animation-name: dropdiag;
-    -webkit-animation-name: dropdiag;
-    animation-iteration-count: 1;
-    -webkit-animation-iteration-count: 1;
-    animation-timing-function: ease-out;
-    -webkit-animation-timing-function: ease-out;
-    animation-duration:0.5s;
-    -webkit-animation-duration:0.5s;
+    animation: dropdiag 0.5s ease-out
+        0s 1 normal forwards;
+    -webkit-animation: dropdiag 0.5s ease-out
+        0s 1 normal forwards;
 }
 
 .modal-diag.away {
-    animation-name: updiag;
-    -webkit-animation-name: updiag;
-    animation-iteration-count: 1;
-    -webkit-animation-iteration-count: 1;
-    animation-timing-function: ease-out;
-    -webkit-animation-timing-function: ease-out;
-    animation-duration: 0.5s;
-    -webkit-animation-duration: 0.5s;
-    animation-fill-mode: forwards;
-    -webkit-animation-fill-mode: forwards;
+    animation: updiag 0.5s ease-out 
+        0s 1 normal forwards;
+    -webkit-animation: updiag 0.5s ease-out 
+        0s 1 normal forwards;
 }
 
 /*
@@ -368,8 +298,8 @@ body, input[type=password]{
 }
 
 .new{
-	animation: scaledown 0.1s ease-in;
-	-webkit-animation: scaledown 0.1 ease-in;
+	animation: scaledown 0.2s ease-in;
+	-webkit-animation: scaledown 0.2s ease-in;
 	overflow: hidden;
 }
 
@@ -417,13 +347,10 @@ body, input[type=password]{
 }
 
 
-
-
 .move-back{
 	transform: translateX(0px) translateY(0px);
 	transition: 0.5s ease-in;
 }
-
 .move-right{
     transform: translateX(10px);
     transition: 0.2s ease-in;
@@ -438,8 +365,6 @@ body, input[type=password]{
 	position: absolute;
 	top: 0px;
 	left: 0px;
-	box-shadow: 2px 2px 5px 6px #222;
-	background: rgb(40,40,40);
   opacity: 0.7;
 }
 
@@ -448,9 +373,61 @@ body, input[type=password]{
 	height: 25px;
 	margin-top:15px;
 }
-.shrink {
-	transform: scaleY(0.0);
-  -webkit-transform: scaleY(0.0);
-	transition: 0.3s ease-in;
-  -webkit-transition: 0.3s ease-in;
+/*
+ * colors
+ */
+
+body, input[type="input"],input[type="password"] {
+    color: rgb(170,170,170);
+}
+
+body, .modal-diag {
+  background: rgb(40,40,40);
+}
+/*input boxes*/
+.textinput, .textinput:focus{
+    border-bottom-color: rgba(170,170,170,0.55);
+}
+input[type="input"],input[type="password"]{
+    border-color: rgb(60,60,60);
+}
+
+
+/*button colors*/
+.pushbtn{
+  background: rgb(70,70,70);
+}
+
+.pushbtn:hover{
+	color: rgb(190,190,190);
+}
+
+.pushbtn:active{
+    background: rgb(60,60,60);
+}
+
+.hidbutton {background: rgb(110,110,20);}
+.hidbutton .hid1,
+.hidbutton .hid2{
+    background: rgb(160,160,20);
+}
+
+.addbutton  { background: rgb(50,99,0); }
+.butbox:hover .addbutton .add1,
+.butbox:hover .addbutton .add2{
+    background: rgb(24,160,14);
+}
+
+.delbutton  { background: rgb(99,20,10);}
+.butbox:hover .delbutton .rm1,
+.butbox:hover .delbutton .rm2{
+    background: rgb(160,24,14);
+}
+
+.dragbutton { background: rgb(20,00,99);}
+
+
+/* general box shadow*/
+#root, .modal-diag, .above{
+    box-shadow: 2px 2px 5px 6px #222;
 }

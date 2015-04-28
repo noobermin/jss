@@ -37,9 +37,9 @@ function idof(el){return el.id;}
 function mkel(type, attr, classes, val) {
     var ret = document.createElement(type);
     if (attr) for (prop in attr)
-	ret[prop] = attr[prop];
+	    ret[prop] = attr[prop];
     if (classes)
-	addclass(ret,classes);
+	    addclass(ret,classes);
     if (val)ret.innerHTML = val;
     return ret;
 }
@@ -49,26 +49,25 @@ function append(el) {
     if (Array.isArray(arguments[1])) list = arguments[1];
     else list = slice(arguments,1,arguments.length);
     list.map(
-	function(c){return is$(c) ?  c.el : c;}
+	    function(c){return is$(c) ?  c.el : c;}
     ).map(
-	function(c){el.appendChild(c);}
+	    function(c){el.appendChild(c);}
     );
     return el;
 }
 function rmclass(el) {
     if (Array.isArray(arguments[1]))
-	el.classList.remove.apply(el.classList,arguments[1]);
+	    el.classList.remove.apply(el.classList,arguments[1]);
     else
-	el.classList.remove.apply(el.classList,
-				  slice(arguments,1,arguments.length));
+	    el.classList.remove.apply(el.classList,
+				                  slice(arguments,1,arguments.length));
     return el;
 }
 function addclass(el) {
     if (Array.isArray(arguments[1])) {
-	el.classList.add.apply(el.classList,arguments[1]);
+	    el.classList.add.apply(el.classList,arguments[1]);
     } else {
-	el.classList.add.apply(el.classList,
-			       slice(arguments, 1, arguments.length));
+	    el.classList.add.apply(el.classList,slice(arguments, 1, arguments.length));
     }
     return el;
 }
@@ -118,21 +117,20 @@ function rmel(el,tempclass,delay,f) {
     if(!el) return;
     el = $toel(el);
     if (tempclass && !delay) {
-	delay = tempclass; delete tempclass;
+	    delay = tempclass; delete tempclass;
     }
     if (delay) {
-	if (tempclass) addclass(el,tempclass);
-	setTimeout(function() {
-	    if (el.parentElement)
-		    el.parentElement.removeChild(el);
-	    if (f) f();
-	},delay);
+	    if (tempclass) addclass(el,tempclass);
+	    setTimeout(function() {
+	        if (el.parentElement)
+		        el.parentElement.removeChild(el);
+	        if (f) f();
+	    },delay);
     } else {
-	if (el.parentElement) {
-	    el.parentElement.removeChild(el);
-	}
+	    if (el.parentElement) {
+	        el.parentElement.removeChild(el);
+	    }
     }
-    
 }
 
 function inner(el,innert) {
@@ -218,13 +216,13 @@ function $mkel(a,b,c,d){return $(mkel(a,b,c,d));}
 function mkxhr(){
     if (window.XMLHttpRequest){ return new XMLHttpRequest();}
     else if (window.ActiveXObject) {
-	var ret=null;
-	try { ret = new ActiveXObject("Msxml2.XMLHTTP");}
-	catch (e) {
-	    try { ret = new ActiveXObject("Microsoft.XMLHTTP");}
-	    catch(e){}
-	}
-	return ret;
+	    var ret=null;
+	    try { ret = new ActiveXObject("Msxml2.XMLHTTP");}
+	    catch (e) {
+	        try { ret = new ActiveXObject("Microsoft.XMLHTTP");}
+	        catch(e){}
+	    }
+	    return ret;
     }
     return null;
 }

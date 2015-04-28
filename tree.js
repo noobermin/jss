@@ -20,7 +20,7 @@ var saver = saver || {};
 function $mkbutton(id, hclass, clickf) {
     var ret =
     $mkel("div",{"id":id},
-	  concat(['button','active-btn'],hclass),
+	  concat(['button','active-btn'], hclass),
 	  ""
     ).evlis("click",function(){saver.up();});
     if(clickf)ret.evlis("click", clickf);
@@ -31,10 +31,11 @@ function mkbutton(id, classes, clickf){
 
 function mkinput(id, classes, val, inputf) {
     var ret = $mkdiv(
-	id,concat(["textinput"],classes), val
+	    id, "textinput", val
     ).attr(
-	"contentEditable","true"
+	    "contentEditable","true"
     ).evlis("input",function(){saver.up(0.2);});
+    if (classes) ret.addclass(classes);
     if (inputf) ret.evlis("input", inputf);
     return ret.el;
 }
@@ -49,14 +50,16 @@ function mkspan(id, classes, inner) {
 function $mkspan(id, classes, inner) {
     return $(mkspan(id,classes,inner));
 }
-function mkpush_button(id,classes,inner,clickf) {
+function $mkpush_button(id,classes,inner,clickf) {
     var ret = $mkspan(
-	id,["button","pushbtn"],inner
-    ).addclass(
-	classes
+	    id, concat(["button","pushbtn"]), inner
     );
+    if (classes) addclass(ret,classes);
     if (clickf) ret.evlis('click',clickf);
-    return ret.el;
+    return ret;
+}
+function mkpush_button(id,classes,inner,clickf) {
+    return $mkpush_button(id,classes,inner,clickf).el;
 }
 
 function select_contents(el) {
@@ -114,66 +117,63 @@ function hide_kids(id) {
     $(children).rmclass("visible").addclass("hidden");
 }
 
-function make_child(parent,text,root,
-		    skipHide,noAnimate,noFocus) {
+function make_child(parent,text,root,skipHide,noAnimate,noFocus) {
     ids++;
-    var myid=ids;
+    var myid  = ids;
     var child = $mkdiv(myid,"node").append(
-	/*header*/
-	$mkdiv(
-	    myid+"-header","header"
-	).append(
-	    /*hide button*/
-	    $mkbutton(
-		myid+"-","hidbutton",
-		function(){hide_toggle(child);}
-	    ).append(
-		mkdiv(myid+"-"+"_1","hid1"), mkdiv(myid+"-"+"_2","hid2")
-	    )
-	).append(
-	    /*text input*/
-	    mkinput(myid+"-input","textinput",text)
-	).append(
+	    /*header*/
 	    $mkdiv(
-		/*button box*/
-		myid+"-butts","butbox"
+	        myid+"-header","header"
 	    ).append(
-		//add button
-		$mkbutton(
-		    myid+"+", "addbutton",
-		    function(){make_child(child,'New Note',root);}
-		).append(
-		    mkdiv(myid+"+_1","add1"),mkdiv(myid+"+_2","add2")
-		)
+	        /*hide button*/
+	        $mkbutton(
+		        myid+"-","hidbutton",
+		        function(){hide_toggle(child);}
+	        ).append(
+		        mkdiv(myid+"-"+"_1","hid1"), mkdiv(myid+"-"+"_2","hid2")
+	        )
 	    ).append(
-		//rm button
-		$mkbutton(
-		    myid+"x", "delbutton",
-		    function(){del(child,skipHide);}
-		).append(
-		    mkdiv(myid+"+_1","rm1"),mkdiv(myid+"+_2","rm2")
-		)
+	        /*text input*/
+	        mkinput(myid+"-input","textinput",text)
 	    ).append(
-		//move tart button
-		$mkbutton(
-		    myid+"M","dragbutton"
-		).evliss(
-		    "mousedown", function(e){return root.start_move(e);}
-		)
+	        $mkdiv(
+		        /*button box*/
+		        myid+"-butts","butbox"
+	        ).append(
+		        //add button
+		        $mkbutton(
+		            myid+"+", "addbutton",
+		            function(){make_child(child,'New Note',root);}
+		        ).append(
+		            mkdiv(myid+"+_1","add1"),mkdiv(myid+"+_2","add2")
+		        )
+	        ).append(
+		        //rm button
+		        $mkbutton(
+		            myid+"x", "delbutton",
+		            function(){del(child,skipHide);}
+		        ).append(
+		            mkdiv(myid+"+_1","rm1"),mkdiv(myid+"+_2","rm2")
+		        )
+	        ).append(
+		        //move tart button
+		        $mkbutton(
+		            myid+"M","dragbutton"
+		        ).evliss(
+		            "mousedown", function(e){return root.start_move(e);}
+		        )
+	        )
+	    ),
+	    /*children*/
+	    $mkdiv(
+	        myid+"-children"
 	    )
-	),
-	/*children*/
-	$mkdiv(
-	    myid+"-children"
-	)
-	/*new kids do not have children*/
+	        /*new kids do not have children*/
     ).addclass(
-	"childless"
+	    "childless"
     ).el;
-    if (!noAnimate) {
-	addclass(child,"new");
-	setTimeout(function(){rmclass(child,"new");},300);
-    }
+    if (!noAnimate)
+        addtempclass(child,"new",300);
     insert_leaf(parent,child,skipHide,noFocus);
     return child;
 }
@@ -200,10 +200,10 @@ function hide_toggle(node) {
 
 function save(root,loginfo) {
     function save_r(el) {
-	return {
-	    text:     byid(idof(el)+'-input').innerHTML,
-	    children: getkids(el).map(function(c){ return save_r(c);})
-	};
+	    return {
+	        text:     byid(idof(el)+'-input').innerHTML,
+	        children: getkids(el).map(function(c){ return save_r(c);})
+	    };
     }
     console.log("saving...");
     
@@ -226,36 +226,33 @@ function save(root,loginfo) {
 }
 
 function restore_req(root,loginfo) {
+    if(!loginfo) return;
     xhr=mkxhr();
     xhr.onreadystatechange = function() {
-	console.log("got response");
-	if(xhr.readyState === 4 && xhr.status === 200)
-	    restore(root, xhr.responseText);
+	    console.log("got response");
+	    if(xhr.readyState === 4 && xhr.status === 200)
+	        restore(root, xhr.responseText);
     };
     xhr.open("POST","/get",true);
     xhr.send("username="+loginfo.uname+
-	     "&password="+loginfo.passwd);
+	         "&password="+loginfo.passwd);
 }
 
 function restore(root, data) {
-    function restore_r(node,cur,ignorehide) {	
-	var child  = make_child(node, cur.text, root,
-				ignorehide, true, true);
-	cur.children.map(function(c){
-	    restore_r(child, c);
-	});
-	return child;
+    function restore_r(node,cur,ignorehide)
+    {	
+	 var child  = make_child(node, cur.text, root,
+				             ignorehide, true, true);
+	    cur.children.map(function(c){
+	        restore_r(child, c);
+	    });
+	    return child;
     }
-    JSON.parse(data).map(function(c) {
-	var child=restore_r(root,c,true);
-    });
+    JSON.parse(data).map(function(c){restore_r(root,c,true);});
     getkids(root.el).map(function(c) {
-	if (getkids(c).length != 0)
-	    hide_kids(c);
+	    if (getkids(c).length != 0)	hide_kids(c);
     });
 }
-
-function clean(){ docCookies.removeItem('tree');}
 
 function init() {
     login();
@@ -263,79 +260,83 @@ function init() {
 
 function login() {
     var body=document.body;
-    var login = mkdiv("login",['modal-diag','drop']);
-    login.innerHTML =
-    '<form method="post" action="/login" id="loginform">\
-      <div>\
-       <label for="username">Username:</label><input type="input" name="username" id="username"/>\
-      </div>\
-      <div>\
-       <label for="password">Password:</label><input type="password" name="password" id="password"/>\
-      </div>\
-      <div id="subbox">\
-      </div>\
-     </form>';
     function submit(){checklogin(byid("loginform"));return false;}
-    body.appendChild(login);
-    //haxxorz
-    byid('subbox').appendChild(
-	mkpush_button("submit",[],'Submit',submit)
+    var login = $mkdiv(
+        "login",['modal-diag','drop']
+    ).append(
+        $mkel(
+            "form",
+            {"method":"post","action":"/login","id":"loginform"}
+        ).evlis('keydown',function(e){
+            if (e.keyCode === 13) submit();
+        }).append(
+            $mkdiv("").append(
+                $mkel("label",{"for":"username"},null,"Username:"),
+                $mkel("input",
+                      {"type":"input","name":"username","id":"username"},
+                      null,
+                      "Username:"
+                )
+            ),
+            $mkdiv("").append(
+                $mkel("label",{"for":"password"},null,"Password:"),
+                $mkel("input",
+                      {"type":"password","name":"password","id":"password"},
+                      null,
+                      "Password:"
+                )
+            ),
+            $mkpush_button("subbox","","Submit",submit)
+        )
     );
-    $(byid('loginform')).evlis('keydown',function(e){
-	if (e.keyCode === 13) submit();
-    });
+    body.appendChild(login.el);
 }
 
 function checklogin(form) {
     xhr=mkxhr();
     //for now...
-    var loginfo = {uname:byid("username").value,
-		  passwd:byid("password").value};
+    var loginfo = {uname:byid("username").value,passwd:byid("password").value};
     xhr.onreadystatechange = function() {
-	if (xhr.readyState===4) {
-	    if (xhr.status===200) {
-		console.log("success");
+	    if (xhr.readyState===4) {
+	        if (xhr.status===200) {
+		        console.log("success");
+	        }
+	        else if (xhr.status===403) {
+		        console.log("fail");
+		        loginfo=null;
+	        }
+	        $byid('login').rmclass("drop").addclass("away");
+	        setTimeout(function(){initapp(loginfo);},1000);
 	    }
-	    else if (xhr.status===403) {
-		console.log("fail");
-		loginfo=null;
-	    }
-	    var lg = byid('login');
-	    $(lg).rmclass("drop").addclass("away");
-	    window.setTimeout(function(){
-		initapp(loginfo);
-	    },1000);
-	}
     }
     xhr.open("post", form.action, true);
     xhr.setRequestHeader('Content-type', 'application/x-www-from-urlencoded');
     try { xhr.send("username="+loginfo.uname+
 		   "&password="+loginfo.passwd); }
-    catch (e) {}
+    catch (e) {console.log("error caught in send: %o",e)}
 }
 
-function strip(){
-    var body = document.body;
-    while (body.hasChildNodes())
-	body.removeChild(body.lastChild);
-}
 
 function notify(message){
-    var bg = mkdiv("modalbg",["modal"]);
-    document.body.appendChild(bg);
-    var diag = mkdiv(
-	"diag",["modal-diag","drop"],
-	message
+    document.body.appendChild(
+        $mkdiv(
+            "modalbg",["modal"]
+        ).append(
+            $mkdiv(
+	            "diag",["modal-diag","drop"],message
+            ).append(
+                mkpush_button(
+                    "modal-button", "", "ok",function(){
+                        $byid("diag").rmclass("drop").rmel("away",500,function(){
+                            $byid("modalbg").rmel();
+                        });
+                    }
+                )
+	            
+            )
+        ).el
     );
-    bg.appendChild(diag);
-    diag.appendChild(
-	mkpush_button("modal-button", [], "ok", function(){
-	    $(diag).rmclass("drop").addclass("away");
-	    setTimeout(function(){
-		document.body.removeChild(bg);
-	    },500);
-	})
-    );
+
 }
 
 //obtain a list of visible
@@ -368,7 +369,7 @@ function tempmove(el,dr,transtime) {
 }
 
 function initapp(loginfo,suppressNotify) {
-    strip();
+    prune(document.body);
     if (!loginfo && !suppressNotify) setTimeout(function(){
 	    notify("We we're unable to log in...<br/>"
 	          +"Data will not be saved.");
@@ -381,36 +382,31 @@ function initapp(loginfo,suppressNotify) {
 	        $mkdiv(
 		        "root-header","root-header"
 	        ).append(
-		        mkpush_button("new", [], "New", function(){
+		        mkpush_button("new", "", "New", function(){
 		            make_child(app.el,'New Note', app, true);})
 	        ).append(
-		        mkpush_button("save", [], "Save",
+		        mkpush_button("save", "", "Save",
 			                  function(){save(app.el, loginfo);})
-	        )
-	    ).append(
+	        ),
 	        $mkdiv(
-		        "root-children"
+		        "root-children","root-children"
 	        )
 	    ).evliss(
 	        "mousemove", function(e){app.move(e);},
 	        "mouseup", function(e){app.end_move(e);}
-	    );
+        );
 	    /*then, we create the methods*/
 	    app.start_move = function(e) {
 	        this.possible = nodefor(e.target);
-	        var tmp = this.possible.getBoundingClientRect();
-	        this.offset = {
-		        x:e.clientX-tmp.left, y:e.clientY-tmp.top
-	        };
-	    };	
-	    const overlap = {
-	        notin:0, inbody:1, inhead:2, inall:3
-	    }
+        }
+	    const overlap = { notin:0, inbody:1, inhead:2, inall:3}
 	    function insidebox(x, y, body, head) {
 	        var ret=0;
-	        if(y > body.top && y < body.bottom && x > body.left && x < body.right)
+	        if(y > body.top && y < body.bottom
+                && x > body.left && x < body.right)
 		        ret |= overlap.inbody;
-	        if(y > head.top && y < head.bottom && x > head.left && x < head.right)
+	        if(y > head.top && y < head.bottom
+                && x > head.left && x < head.right)
 		        ret |= overlap.inhead;
 	        return ret;
 	    }
@@ -421,7 +417,7 @@ function initapp(loginfo,suppressNotify) {
 	        });
 	        var head=true;
 	        var i = findfirst(matches, function(c){
-		    return c & overlap.inhead;
+		        return c & overlap.inhead;
 	        });
 	        if (i==-1) {
 		        i = findfirst(matches, function(c){
@@ -447,7 +443,10 @@ function initapp(loginfo,suppressNotify) {
 	    app.overarea.top=1;
 	    app.overarea.insert=2;
 	    app.overarea.invalid=3;
-
+        
+	    app.valid_target = function (obj){
+            return !has(this.undropable, idof(obj));
+	    };
 	    app.move = function(e) {
 	        if(!this.movee) {
 		        if(!this.possible) {
@@ -467,8 +466,6 @@ function initapp(loginfo,suppressNotify) {
 			            this.el
 		            ).map(function(c){
 			            var id = idof(c);
-			            var box = c.getBoundingClientRect(),
-			                head = byid(idof(c)+"-header").getBoundingClientRect();
 			            return {
 			                id : id,
 			                body: c.getBoundingClientRect(),
@@ -496,14 +493,9 @@ function initapp(loginfo,suppressNotify) {
 		            break;
 	        }
 	    };
-	    app.valid_target = function (obj) {
-	        return !has(this.undropable, idof(obj));
-	    };
 	    app.over_shift = function(el, inclusive) {
-	        var id=idof(el);
-	        if (this.overstate === "shift") {
-		        return;
-	        }
+            var id=idof(el);
+	        if (this.overstate === "shift") return;
 	        this.over_cleanup();
 	        var tmp = $mkdiv("temp",["temp","new"]);
 	        if (inclusive) insert_before(tmp,el);
@@ -544,7 +536,7 @@ function initapp(loginfo,suppressNotify) {
 	        var over = byid(this.current_over);
 	        var newpos = over.getBoundingClientRect();
 	        rmclass(this.movee,"above");
-
+            
 	        if (this.overstate === "insert") {
 		        insert_leaf($byid(this.current_over), this.movee);
 		        saver.up();
@@ -588,10 +580,10 @@ function initapp(loginfo,suppressNotify) {
 		            this.num = 0;
 		        }
 	        };
-	    })(app.el,loginfo);
-	    
+	    })(app, loginfo);
 	    return app.el;
     })();
+    console.log
     document.body.appendChild(root);
     
     evlis(window,'keydown',function(e){
