@@ -1,8 +1,46 @@
 var ids=0;
+const em2px = 16;
+const headerw = 16,
+      headerh = 1.25;
 //traversing child nodes, avoiding headers...
 function getkids(parent){
     return slice($toel(parent).childNodes[1].childNodes);
 }
+
+//obtain a list of visible, traverses whole tree
+function visiblekids(parent) {
+    function _visible_kids(cur) {
+	    var ret=[], kids=getkids(cur);
+	    for (var i = 0; i < kids.length; ++i) {
+	        ret = ret.concat(kids[i]);
+	        if (kidsvisible(kids[i]))
+		        ret = ret.concat(_visible_kids(kids[i]));
+	    }
+	    return ret;
+    }
+    return _visible_kids(parent);
+}
+function visible_immediate_kids(parent) {
+    return getkids(parent).filter(function(c) {
+        return kidsvisible(c);
+    });
+}
+
+//get the depth of visible children
+function maxdepth(el,d) {
+    if (d === undefined)
+        d=0;
+    if (visible_immediate_kids(el).length === 0)
+        return d;
+    return Math.max.apply(
+        null, visible_immediate_kids(
+            el
+        ).map(function(c){
+            return maxdepth(c,d+1);
+        })
+    );
+}
+
 //get the parent of the child
 function parentof(child){
     return nodefor(nodefor(child).parentElement);
@@ -77,8 +115,7 @@ function insert_leaf(parent,el,skipHide,noFocus){
     if (!noFocus) focus(el);
     /*checking if first child*/
     if (getkids(parent).length > 0 && !skipHide)
-	rmclass(parent, "childless");
-    
+	rmclass(parent, "childless");    
 }
 
 function focus(id){
@@ -88,33 +125,124 @@ function focus(id){
     select_contents(el);
 }
 
-function _visible(hidestate) {
-    return !hasclass(hidestate,"hidbutton-show");
-}
 function kidsvisible(el) {
-    return byid(idof(el)+"-") && _visible(byid(idof(el)+"-"));
+    return !hasclass(el,"hidekids");
 }
 
 function check_hide(parent) {
     if (getkids(parent).length == 0)
 	addclass(parent,"childless");
 }
-
-function show_kids(id) {
-    if (typeof(id) == "object") id = idof(id);
-    var hbtn = byid(id+"-");
-    var children = byid(id+"-children");
-
-    rmclass(hbtn,"hidbutton-show");
-    $(children).rmclass("hidden").addclass("visible");
+function prop2num(el,prop,pref){
+    if (pref) {
+        return Number(el.style[prop].replace(pref,""));
+    } else {
+        return Number(el.replace(prop,""));
+    }
 }
-function hide_kids(id) {
-    if (typeof(id) == "object") id = idof(id);
-    var hbtn = byid(id+"-");
-    var children = byid(id+"-children");
 
-    addclass(hbtn,"hidbutton-show");
-    $(children).rmclass("visible").addclass("hidden");
+//I copy jquery...
+function anim(el, prop, to, time, done) {
+    el = $toel(el);
+    var from,post=null,steps=40;
+    if (el.style[prop] === undefined) {
+        console.warn("%o's %s property is undefined.",el,prop);
+        return null;
+    }
+    if (typeof el.style[prop] === "string") {
+        if (el.style[prop].match("em")) {
+            post = "em";
+        } else if (el.style[prop].match("px")) {
+            post = "px";
+        }
+        from = prop2num(el, prop, post);
+        to   = prop2num(to, post);
+    } else if (typeof el.style[prop] === "number") {
+        from = el.style[prop];
+    }
+    var lasttime = Date.now();
+    var dx = (to-from)/steps, cur = from;
+    var lastime
+    var interval;
+    var f = dx > 0 ?
+            (function(){
+                var dt = Date.now()-lasttime;
+                cur += (to-from) * dt/time;
+                lasttime = Date.now();
+                el.style[prop] = cur + post;
+                if (cur >= to) {
+                    clearInterval(interval);
+                    if (done) done(el);
+                }
+            })
+        :
+            (function(){
+                var dt = Date.now()-lasttime;
+                cur += (to-from) * dt/time;
+                lasttime = Date.now();
+                el.style[prop] = cur + post;
+                if (cur <= to) {
+                    clearInterval(interval);
+                    if (done) done(el);
+                }
+            });
+    interval = setInterval(f,time/steps);
+}
+
+function show_kids(el,animate) {
+    if (typeof(el) == "string") el = byid(el);
+    el = $toel(el);
+    var maxheight = visiblekids(el).length * 2.5,
+        maxwidth  = maxdepth(el) + headerw,
+        children = byid(idof(el)+"-children"),
+        w = false;
+    $(el).rmclass("hidekids");
+    if (animate) {
+        children.style.maxWidth="16em";
+        children.style.maxHeight="0.02em";
+        children.style.overflow="hidden";
+        anim(
+            children,
+            "maxWidth",maxwidth+"em",75,
+            function(el){
+                anim(
+                    children,
+                    "maxHeight",maxheight+"em",150,
+                    function(el){
+                        el.style = "";
+                    }
+                );
+            }
+        );
+    }
+}
+
+function hide_kids(el,animate) {
+    if (typeof(el) == "string") el = byid(el);
+    el = $toel(el);
+    var maxheight = visiblekids(el).length * 2.5,
+        maxwidth  = maxdepth(el) + 16,
+        children = byid(idof(el)+"-children");
+    if (animate) {
+        children.style.maxWidth =maxwidth+"em"
+        children.style.maxHeight=maxheight+"em";
+        children.style.overflow="hidden";
+        anim(
+            children,
+            "maxHeight","0em",150,
+            function(){
+                anim(
+                    children,
+                    "maxWidth","0em",75,
+                    function(){
+                        addclass(el,"hidekids");
+                    }
+                );
+            }
+        );
+    } else {
+        $(el).addclass("hidekids");
+    }
 }
 
 function make_child(parent,text,root,skipHide,noAnimate,noFocus) {
@@ -166,7 +294,7 @@ function make_child(parent,text,root,skipHide,noAnimate,noFocus) {
 	    ),
 	    /*children*/
 	    $mkdiv(
-	        myid+"-children"
+	        myid+"-children","children"
 	    )
 	        /*new kids do not have children*/
     ).addclass(
@@ -185,17 +313,13 @@ function del(el,skipHide) {
     });
 }
 
-function hide_toggle(node) {
-    var id = idof(node);
-    var hbtn = byid(id+"-");
-    if ($(node).hasclass("childless")) return;
-    if (_visible(hbtn)) {
-	    hide_kids(node);
-	    $(hbtn).addclass("hidbutton-show");
-    } else {
-	    show_kids(node);
-	    $(hbtn).rmclass("hidbutton-show");
-    }
+function hide_toggle(el) {
+    el = $(el);
+    if (el.hasclass("childless")) return;
+    if (kidsvisible(el))
+        hide_kids(el,true);
+    else
+        show_kids(el,true);
 }
 
 function save(root,loginfo) {
@@ -339,32 +463,18 @@ function notify(message){
 
 }
 
-//obtain a list of visible
-function visiblekids(parent) {
-    function _visible_kids(cur) {
-	var ret=[], kids=getkids(cur);
-	for (var i = 0; i < kids.length; ++i) {
-	    ret = ret.concat(kids[i]);
-	    if (kidsvisible(kids[i]))
-		ret = ret.concat(_visible_kids(kids[i]));
-	}
-	return ret;
-    }
-    return _visible_kids(parent);
-}
-
 function tempmove(el,dr,transtime) {
     var movestyle ="translateX("+dr.x+"px) translateY("+dr.y+"px)";
     if (el.style.webkitTransform)
-	el.style.webkitTransform = movestyle;
+	    el.style.webkitTransform = movestyle;
     else
-	el.style.transform = movestyle;
+	    el.style.transform = movestyle;
     if (transtime) {
-	movestyle=transtime+"s ease-in"
-	if (el.style.webkitTransition)
-	    el.style.webkitTransition = movestyle;
-	else
-	    el.style.transition = movestyle;
+	    movestyle=transtime+"s ease-in"
+	    if (el.style.webkitTransition)
+	        el.style.webkitTransition = movestyle;
+	    else
+	        el.style.transition = movestyle;
     }
 }
 
@@ -398,8 +508,13 @@ function initapp(loginfo,suppressNotify) {
 	    /*then, we create the methods*/
 	    app.start_move = function(e) {
 	        this.possible = nodefor(e.target);
+            console.log(this.possible);
+            this.element_offset = {
+                x:e.clientX - this.possible.offsetLeft,
+                y:e.clientY - this.possible.offsetTop
+            };
         }
-	    const overlap = { notin:0, inbody:1, inhead:2, inall:3}
+	    const overlap = {notin:0, inbody:1, inhead:2, inall:3};
 	    function insidebox(x, y, body, head) {
 	        var ret=0;
 	        if(y > body.top && y < body.bottom
@@ -475,9 +590,20 @@ function initapp(loginfo,suppressNotify) {
 		            
 		        }
 	        }
-            var offset = byid("root").getBoundingClientRect();
-	        var dr = {x:e.clientX-offset.left-20,
-		              y:e.clientY-offset.top-20};
+            var root = $byid("root");
+            var offset = root.el.getBoundingClientRect();
+            var padding = getComputedStyle(
+                root.el,null
+            ).getPropertyValue(
+                "padding-top"
+            ).replace("px","");
+            padding = Number(padding);
+            
+	        var dr = {
+                x: e.clientX - offset.left,
+		        y: e.clientY - offset.top
+            };
+            
 	        tempmove(this.movee,dr);
 	        var over = this.overarea(e);
 	        if (!over || !this.valid_target(over.target)) return;
@@ -514,12 +640,16 @@ function initapp(loginfo,suppressNotify) {
 	        this.overstate = "insert";
 	        this.current_over = idof(el);
 	    };
-	    app.over_cleanup = function(instant) {
+        app.rmtemp = function(delay) {
+            if (!delay) delay=300;
+            byclass("temp").map(function(el) {
+		        $(el).rmel("erase", delay);
+		    });
+        };
+	    app.over_cleanup = function() {
 	        //removing temp from shifting
 	        if (this.overstate === "shift") {
-		        byclass("temp").map(function(el) {
-		            $(el).rmel("erase",300);
-		        });
+		        this.rmtemp();
 		        delete this.before;
 	        } else if (this.overstate === "insert") {
 		        var cur = $byid(this.current_over);
@@ -532,11 +662,12 @@ function initapp(loginfo,suppressNotify) {
 	    };
 	    app.end_move = function(e) {
 	        if(!this.movee) return;
+            console.log(this.overstate);
 	        var current = this.movee.getBoundingClientRect();
 	        var over = byid(this.current_over);
 	        var newpos = over.getBoundingClientRect();
+            this.rmtemp(1);
 	        rmclass(this.movee,"above");
-            
 	        if (this.overstate === "insert") {
 		        insert_leaf($byid(this.current_over), this.movee);
 		        saver.up();
@@ -549,8 +680,8 @@ function initapp(loginfo,suppressNotify) {
 		        console.log("no overstate");
 	        }
 	        tempmove(this.movee, {
-		        x:current.x-44,
-		        y:current.y-newpos.y+(this.before?40:0)
+		        x:current.x-newpos.x,
+		        y:current.y-newpos.y
 	        });
 	        var tmp = this.movee;
 	        setTimeout(function(){
@@ -558,14 +689,14 @@ function initapp(loginfo,suppressNotify) {
 		        tmp.style.webkitTransform = "";
 		        tmp.style.transition = "";
 		        tmp.style.webkitTransition = "";
-	        },1);
+	        },100);
 	        setTimeout(function(){
 		        tmp.style="";
-	        },300);
+	        },100);
 	        saver.up();
 	        delete this.movee;
 	        check_hide(this.oldcontext.parent);
-	        this.over_cleanup(true);
+            this.over_cleanup();
 	    };
 	    restore_req(app, loginfo);
 
@@ -583,7 +714,6 @@ function initapp(loginfo,suppressNotify) {
 	    })(app, loginfo);
 	    return app.el;
     })();
-    console.log
     document.body.appendChild(root);
     
     evlis(window,'keydown',function(e){

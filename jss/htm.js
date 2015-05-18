@@ -81,6 +81,7 @@ function addtempclass(el){
 }
 
 function hasclass(el){
+    el = $toel(el);
     return el.classList.contains.apply(el.classList,
 				       slice(arguments,1,arguments.length));
 }
