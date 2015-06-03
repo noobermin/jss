@@ -110,22 +110,26 @@ body, input{
     -webkit-transition: 0.1s;
     z-index: 1;
 }
-
+.butbox .button{
+    position: relative;
+}
 .butbox:hover{
-    transform: scale(1.5);
-    -webkit-transform: scale(1.5);
-    transition: 0.1s linear;
-    -webkit-transition: 0.1s linear;
+    transform: scale(1.7);
+    -webkit-transform: scale(1.7);
+    transition: 0.15s ease-out;
+    -webkit-transition: 0.15s ease-out;
 }
 
 .butbox:hover .button{
-    position: relative;
-    margin-left: 0.35em;
- }
+    transform: scale(0.85);
+    -webkit-transform: scale(0.85);
+    transition: 0.2s ease-in-out;
+    -webkit-transition: 0.2s ease-in-out;
+}
 
 .butbox:hover .button:hover{
-    transform: scale(1.1);
-    -webkit-transform: scale(1.1);
+    transform: scale(1.0);
+    -webkit-transform: scale(1.0);
     transition: 0.2s ease-in-out;
     -webkit-transition: 0.2s ease-in-out;
 }
