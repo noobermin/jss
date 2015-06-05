@@ -1,33 +1,3 @@
-//my syntatic sugar (slow?)
-function mkarraycall(callname) {
-    return Array.prototype[callname].call.bind(Array.prototype[callname]);
-}
-
-//my "functional" redefinition of these functions
-map = mkarraycall("map");
-filter = mkarraycall("filter");
-concat = mkarraycall("concat");
-reduce = mkarraycall("reduce");
-slice = mkarraycall("slice");
-
-//convience functions
-function has(arraylike,ino){return filter(arraylike,function(c){return c == ino}).length > 0;}
-function last(arraylike){ return arraylike[arraylike.length-1]; }
-function setlast(arraylike,d){ arraylike[arraylike.length-1]=d; }
-function findfirst(arraylike, func) {
-    var arr = slice(arraylike);
-    if (func.constructor !== Function) {
-	var val=func;
-	func = (function(c){return c==val;});
-    }
-    for(var i=0; i < arr.length; ++i)
-	if (func(arr[i])) return i;
-    return -1;
-}
-function concatv(arraylike,lists) {
-    return concat.apply(concat,concat([arraylike],lists));
-}
-
 //aliases
 function byid(id){return document.getElementById(id);}
 function byclass(clas) { return slice(document.getElementsByClassName(clas)); }
