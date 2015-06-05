@@ -18,3 +18,31 @@ function animed_append(el,target,delay){
 	delete target.style;
     }, delay*1000);
 }
+
+function animh(el, h1, h2, time) {
+    el = $(el);
+    
+    var style = el.style;
+    if (style.maxHeight && style.webkitTransition) {
+	    style.webkitTransform = "";
+    } else {
+	    el.style.transform = movestyle;
+    if (transtime) {
+	    movestyle=transtime+"s ease-in"
+
+
+        if (el.style.webkitTransition)
+	        el.style.webkitTransition = movestyle;
+	    else
+	        el.style.transition = movestyle;
+    }
+
+    
+}
+function scalex(el, f, time) {
+    el = $(el);
+    var oldwidth = el.el.clientWidth;
+    var newwidth = el.el.clientWidth*pct;
+
+    
+}
