@@ -152,7 +152,6 @@ var dom = (function(document){
             el.classList.remove.apply(
                 el.classList,other_args(arguments)
             );
-            console.log(el.classList);
             return el;
         },
         addclass: function(el) {
@@ -172,7 +171,6 @@ var dom = (function(document){
             return el;
         },
         hasclass: function(el){
-            console.log(arguments);
             el = $dom.$toel(el);
             var ret= el.classList.contains.apply(
                 el.classList,
