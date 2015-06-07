@@ -2,6 +2,11 @@ var ids=0;
 const em2px = 16;
 const headerw = 16,
       headerh = 1.25;
+importinto(array,window);
+importinto(dom,window);
+importinto($dom,window);
+
+
 //traversing child nodes, avoiding headers...
 function getkids(parent){
     return slice($toel(parent).childNodes[1].childNodes);
