@@ -29,6 +29,12 @@ var vmath = {
     smul:function(a,r){
         return [r*a[0], r*a[1]];
     },
+    div: function(a,b) {
+        return [a[0]/b[0], a[1]/b[1]];
+    },
+    sdiv:function(a,r){
+        return [a[0]/r, a[1]/r];
+    },
     rot: function(a,th){
         var c = Math.cos(th), s = Math.sin(th);
         return [

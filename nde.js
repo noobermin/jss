@@ -1,7 +1,6 @@
 var http = require('http'),
     url = require('url'),
     querystring = require('querystring'),
-    htm = require('./htm'),
     fs = require('fs');
 
 function mkrouter(site,notfound,serverr){
