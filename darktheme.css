@@ -38,14 +38,14 @@ input[type="input"],input[type="password"]{
 }
 
 .addbutton  { background: rgb(50,99,0); }
-.butbox:hover .addbutton .add1,
-.butbox:hover .addbutton .add2{
+.butbox .addbutton .add1,
+.butbox .addbutton .add2{
     background: rgb(24,160,14);
 }
 
 .delbutton  { background: rgb(99,20,10);}
-.butbox:hover .delbutton .rm1,
-.butbox:hover .delbutton .rm2{
+.butbox .delbutton .rm1,
+.butbox .delbutton .rm2{
     background: rgb(160,24,14);
 }
 

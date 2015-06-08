@@ -30,6 +30,9 @@ var site = {
     '/tree.css':  mkfileread("text/css"),
     '/shapes.css':  mkfileread("text/css"),
     '/darktheme.css':  mkfileread("text/css"),
+    '/deftheme.css':  mkfileread("text/css"),
+    '/n.css':  mkfileread("text/css"),
+    '/m.css':  mkfileread("text/css"),
     '/test.html':  mkfileread("text/html"),
     '/login' : mkpostreader(function(data,req,res){
 	var d = querystring.parse(data);
