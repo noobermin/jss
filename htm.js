@@ -234,9 +234,19 @@ var dom = (function(){
             }
         },
         attr: function(el) {
+            el = $dom.$toel(el);
             if( arguments.length == 2) return el[arguments[1]];
-            else for(var i=1; i < arguments.length; i+=2)
-	            el.setAttributeNS(null,[arguments[i]],arguments[i+1]);
+            else for(var i=1; i < arguments.length; i+=2) {
+	            el.setAttribute(arguments[i],arguments[i+1]);
+            }
+            return el;
+        },
+        attrNS: function(el) {
+            el = $dom.$toel(el);
+            if( arguments.length == 2) return el[arguments[1]];
+            else for(var i=1; i < arguments.length; i+=2) {
+	            el.setAttributeNS(null,arguments[i],arguments[i+1]);
+            }
             return el;
         }
     };
