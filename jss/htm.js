@@ -176,7 +176,6 @@ var dom = (function(document){
                 el.classList,
                 other_args(arguments)
             );
-            console.log(ret);
             return ret;
         },
         evlis:function(el,type,f,pass) {
@@ -194,11 +193,13 @@ var dom = (function(document){
             el = $dom.$toel(el);
             before = $dom.$toel(before);
             before.parentElement.insertBefore(el,before.nextSibling);
+            return el;
         },
         insert_before: function(el, after) {
             el = $dom.$toel(el);
             after = $dom.$toel(after);
             after.parentElement.insertBefore(el,after);
+            return el;
         },
         //pruner
         prune: function(el) {
@@ -236,7 +237,7 @@ var dom = (function(document){
             if( arguments.length == 2) return el[arguments[1]];
             else for(var i=1; i < arguments.length; i+=2)
 	            el.setAttributeNS(null,[arguments[i]],arguments[i+1]);
-            return el
+            return el;
         }
     };
     importinto(modify, ret);
@@ -275,7 +276,7 @@ $dom = (function(document){
     function addDmethod(name){
         _$.prototype[name] = function(){
             var ret = applier(D[name], this.el, arguments);
-            return ret.nodeType ? this : ret; //ick
+            return ret && ret.nodeType ? this : ret; //ick
         };
     }
     for(name in D.modify){
