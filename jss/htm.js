@@ -93,7 +93,7 @@ function byclass(clas) { return array.slice(document.getElementsByClassName(clas
 function idof(el){return el.id;}
 
 //DOM stuff
-var dom = (function(document){
+var dom = (function(){
     var arr = array;
     var ret = {};
     function exportf(a){
@@ -243,9 +243,9 @@ var dom = (function(document){
     importinto(modify, ret);
     exportv(modify,"modify");
     return ret;
-})(document);
+})();
 
-$dom = (function(document){
+$dom = (function(){
     var arr = array, D=dom;
     var ret = {};
     function exportf(a){
@@ -302,7 +302,7 @@ $dom = (function(document){
     exportv(factories,"factories");
     
     return ret;
-})(document);
+})();
 
 //xmlhttprequest
 function mkxhr(){
