@@ -12,7 +12,7 @@ var array = (function(){
     }
     var concat = mkarraycall("concat"),
         slice = mkarraycall("slice");
-    return {
+    var ret = {
         map:mkarraycall("map"),
         filter:mkarraycall("filter"),
         concat:concat,
@@ -48,23 +48,24 @@ var array = (function(){
             var t = low; low = Math.min(low,hi);
             hi = Math.max(t,hi);
             if (n == 1) return Math.random()*(hi - low) + low;
-            return arr(n).map(function(c){
+            return ret.arr(n).map(function(c){
                 return Math.random()*(hi - low) + low;
             });
         },
         rndint: function(n, low, hi){
             if (low===undefined) low =0;
-            if (hi===undefined) hi =1;
+            if (hi===undefined) hi = 1;
             var t = low; low = Math.min(low,hi);
             hi = Math.max(t,hi);
+            ++hi;
             if (n == 1) return Math.floor(Math.random()*(hi - low)) + low;
-            arr(n).map(function(c){
+            return ret.arr(n).map(function(c){
                 return Math.floor(Math.random()*(hi - low)) + low;
             });
         },
         pairs: function(arr){
-            return arr.map(function(c,i){
-                return arr.slice(i+1).map(function(d){
+            return ret.arr.map(function(c,i){
+                return ret.arr.slice(i+1).map(function(d){
                     return [c,d];
                 });
             }).reduce(function(p,c){
@@ -79,17 +80,25 @@ var array = (function(){
             var n = (end-start)/step;
             if(n<0)return [];
             
-            return arr(n).map(function(c,i){
+            return ret.arr(n).map(function(c,i){
                 return i*step + start;
             });       
         }
     };
+    return ret;
 })();
 //my "functional" redefinition of these functions
 
 //aliases
 function byid(id){return document.getElementById(id);}
-function byclass(clas) { return array.slice(document.getElementsByClassName(clas)); }
+function byclass(el,clas) {
+    if (!clas) {
+        clas = el; el=document;
+    }
+    if (typeof el==="string") { el = byid(el); }
+    var ret = array.slice(el.getElementsByClassName(clas));
+    return ret.length === 1 ? ret[0] : ret;
+}
 function idof(el){return el.id;}
 
 //DOM stuff
@@ -201,6 +210,11 @@ var dom = (function(){
             after.parentElement.insertBefore(el,after);
             return el;
         },
+        append_to: function(el, newparent){
+            el = $dom.$toel(el);
+            modify.append(newparent,el);
+            return el;
+        },
         //pruner
         prune: function(el) {
             while (el.hasChildNodes()) el.removeChild(el.lastChild);
@@ -298,7 +312,6 @@ $dom = (function(){
     //other goodies
     function is$(el) { return el.__iama_$; }; exportf(is$);
     function $toel(el) { return is$(el) ? el.el : el; }; exportf($toel);
-
     
     function $(el){return !is$(el) ? new _$(el) : el; }
     //creation functions
@@ -306,7 +319,13 @@ $dom = (function(){
         $:$, //MONEY
         $byid: function(id) { return new _$(byid(id));},
         $mkel: function(a,b,c,d){return factories.$(mkel(a,b,c,d));},    
-        $mksvg:function(a,b,c,d){return factories.$(mksvg(a,b,c,d));}
+        $mksvg:function(a,b,c,d){return factories.$(mksvg(a,b,c,d));},
+        $byclass: function(a,b){
+            var ret = byclass(a,b);
+            return ret.length && ret.length>1 ?
+                   ret.map(function(c){return $(c);}) :
+                   $(ret);
+        }
     }
     importinto(factories, ret);
     exportv(factories,"factories");
