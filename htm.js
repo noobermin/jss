@@ -100,7 +100,6 @@ function byclass(el,clas) {
     return ret.length === 1 ? ret[0] : ret;
 }
 function idof(el){return el.id;}
-
 //DOM stuff
 var dom = (function(){
     var arr = array;
@@ -346,6 +345,36 @@ function mkxhr(){
 	    return ret;
     }
     return null;
+}
+//my fetch-like.
+function request(to,message,type){
+    var xhr = mkxhr();
+    if(!type) type = "GET";
+    xhr.open(type,to);
+    xhr.setRequestHeader('Content-type', 'application/x-www-from-urlencoded');
+    try{ xhr.send(message); } catch (e){console.log("error caught in send: %o",e)}
+    xhr._callbacks = [];
+    xhr.onreadystatechange = function(){
+        if (this.readyState === 4) {
+            var cur = this;//be mindful of this! Same this???
+            this._callbacks.forEach(function(f){
+                f(cur.response, cur.responseType, cur.status);
+            });
+        }
+    };
+    xhr.then = function(f) {
+        console.log("yes");
+        this._callbacks.push(f);
+        return this;
+    };
+    xhr.on = function(status, f){
+        var cur = this;//be mindful of this! Same this???
+        this._callbacks.push(function(a,b,c){
+            if(cur.status === status)f(a,b,c);
+        });
+        return this;
+    };
+    return xhr;
 }
 
 //exporting node stuff
