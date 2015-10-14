@@ -393,7 +393,7 @@ function request(to,message,type){
     };
     xhr.on = function(status, f){
         xhr._callbacks.push(function(a,b,c){
-            if(cur.status === status)f(a,b,c);
+            if(xhr.status === status)f(a,b,c);
         });
         return xhr;
     };
