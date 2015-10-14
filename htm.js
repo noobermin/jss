@@ -77,7 +77,7 @@ var array = (function(){
             if(!end){
                 end=start; start=0;
             }
-            var n = (end-start)/step;
+            var n = Math.round((end-start)/step);
             if(n<0)return [];
             
             return ret.arr(n).map(function(c,i){
@@ -87,7 +87,6 @@ var array = (function(){
     };
     return ret;
 })();
-//my "functional" redefinition of these functions
 
 //aliases
 function byid(id){return document.getElementById(id);}
@@ -99,7 +98,27 @@ function byclass(el,clas) {
     var ret = array.slice(el.getElementsByClassName(clas));
     return ret.length === 1 ? ret[0] : ret;
 }
-function idof(el){return el.id;}
+function idof(el){return $dom.$toel(el).id;}
+function lefttop(x){
+    x = $dom.$toel(x).getBoundingClientRect();
+    return [x.left,x.top];
+}
+function setstyle(title){
+    var stylesheets = array.filter(
+        document.styleSheets,
+        function(c){return c.title.length > 0});
+    if (stylesheets.reduce(
+        function(p,c){return p || (c.title === title)};
+    )) {
+        stylesheets.forEach( function(c){ 
+            (c.disabled = c.title !== title)
+        });
+        return true;
+    } else return false;
+}
+//herpaderp, trivial callback
+function return_false(){return false;}
+
 //DOM stuff
 var dom = (function(){
     var arr = array;
@@ -214,7 +233,6 @@ var dom = (function(){
             modify.append(newparent,el);
             return el;
         },
-        //pruner
         prune: function(el) {
             while (el.hasChildNodes()) el.removeChild(el.lastChild);
             return el;
@@ -245,6 +263,14 @@ var dom = (function(){
 	            el.innerHTML = innert;
 	            return el;
             }
+        },
+        select_contents: function(el) {
+            el = $dom$toel(el);
+            var r = document.createRange();
+            r.selectNodeContents(el);
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(r);
         },
         attr: function(el) {
             el = $dom.$toel(el);
@@ -355,24 +381,21 @@ function request(to,message,type){
     try{ xhr.send(message); } catch (e){console.log("error caught in send: %o",e)}
     xhr._callbacks = [];
     xhr.onreadystatechange = function(){
-        if (this.readyState === 4) {
-            var cur = this;//be mindful of this! Same this???
-            this._callbacks.forEach(function(f){
-                f(cur.response, cur.responseType, cur.status);
+        if (xhr.readyState === 4) {
+            xhr._callbacks.forEach(function(f){
+                f(xhr.response, xhr.responseType, xhr.status);
             });
         }
     };
     xhr.then = function(f) {
-        console.log("yes");
-        this._callbacks.push(f);
-        return this;
+        xhr._callbacks.push(f);
+        return xhr;
     };
     xhr.on = function(status, f){
-        var cur = this;//be mindful of this! Same this???
-        this._callbacks.push(function(a,b,c){
+        xhr._callbacks.push(function(a,b,c){
             if(cur.status === status)f(a,b,c);
         });
-        return this;
+        return xhr;
     };
     return xhr;
 }

@@ -1,48 +1,51 @@
-function pos(box) {
-    if (typeof(box) === "string") {
-	box = byid(box).getClientBoundingRect();
-    } else if (box.constructor === Node) {
-	box = box.getClientBoundingRect();
-    }
-    return {x:box.left,y:box.top};
+// anim(el,
+//   {prop:{from:..,to:...,easer:...},..}, {time:...,steps:...,easer:...}, donef)
+function _anim(el, anims, timing, donef){
+    el = $toel(el);
+    var [time, steps] = timing ?
+                        [timing.time, timing.steps] :
+                        [false,false];
+    !steps && (steps=40);
+    !time  && (time=1000);
+    if (!timing || !timing.easer)
+        timing.easer = (x)=>x;
+    //making the animation calls
+    anims = Object.keys(anims).map(function(prop){
+        var [to,from] = [anims[prop].to,anims[prop].from];
+        var easer = anims[prop].easer || null;
+        if (!from) {
+            from = window.getComputedStyle(el).getPropertyValue(prop);
+        }
+        var unit = to.match(
+            /[+-]?(?:\d*\.\d+|\d+\.?\d*)(?:e[+-]?\d+)?(.*)/
+        );
+        unit = Array.isArray(unit) ? unit[1] : "";
+        [to,from] = [parseInt(to),parseInt(from)];
+        var d = to-from;
+        if (easer)
+            return function(x){
+                el.style[prop] = (d*easer(x) + from)+unit;
+            };
+        else
+            return function(x){
+                el.style[prop] = (d*x + from)+unit;
+            };
+    });
+    //setting up callback
+    var start = Date.now(),
+        end   = start + time;
+    var interval = setInterval(function(){
+        if (Date.now() > end) {
+            anims.forEach((f)=>f(1));
+            clearInterval(interval);
+            donef && donef(el);
+        } else {
+            var dx = (Date.now()-start)/time;
+            dx = timing.easer(dx);
+            anims.forEach((f)=>f(dx));            
+        }
+    },time/steps);
 }
-function animed_append(el,target,delay){
-    target=$toel(target);
-    var before = pos(target);
-    append(el,target);
-    var after  = pos(target);
-    var dx = {x:after.x-before.x, y:after.y-before.y};
-    target.style = "transform: translateX("+dx.x+"px) translateY("+dx.y+"px);";
-    if (!delay) delay = 0.2;
-    setTimeout(function(){
-	delete target.style;
-    }, delay*1000);
-}
-
-function animh(el, h1, h2, time) {
-    el = $(el);
-    
-    var style = el.style;
-    if (style.maxHeight && style.webkitTransition) {
-	    style.webkitTransform = "";
-    } else {
-	    el.style.transform = movestyle;
-    if (transtime) {
-	    movestyle=transtime+"s ease-in"
-
-
-        if (el.style.webkitTransition)
-	        el.style.webkitTransition = movestyle;
-	    else
-	        el.style.transition = movestyle;
-    }
-
-    
-}
-function scalex(el, f, time) {
-    el = $(el);
-    var oldwidth = el.el.clientWidth;
-    var newwidth = el.el.clientWidth*pct;
-
-    
-}
+var ani = {
+    animate:_anim
+};
