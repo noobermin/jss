@@ -108,8 +108,8 @@ function setstyle(title){
         document.styleSheets,
         function(c){return c.title.length > 0});
     if (stylesheets.reduce(
-        function(p,c){return p || (c.title === title)};
-    )) {
+        function(p,c){return p || (c.title === title)})
+    ){
         stylesheets.forEach( function(c){ 
             (c.disabled = c.title !== title)
         });
