@@ -265,7 +265,7 @@ var dom = (function(){
             }
         },
         select_contents: function(el) {
-            el = $dom$toel(el);
+            el = $dom.$toel(el);
             var r = document.createRange();
             r.selectNodeContents(el);
             var sel = window.getSelection();
