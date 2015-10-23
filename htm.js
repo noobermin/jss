@@ -335,7 +335,7 @@ $dom = (function(){
     exportf(_$);
     
     //other goodies
-    function is$(el) { return el.__iama_$; }; exportf(is$);
+    function is$(el) { return el && el.__iama_$; }; exportf(is$);
     function $toel(el) { return is$(el) ? el.el : el; }; exportf($toel);
     
     function $(el){return !is$(el) ? new _$(el) : el; }
