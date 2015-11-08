@@ -83,6 +83,12 @@ var array = (function(){
             return ret.arr(n).map(function(c,i){
                 return i*step + start;
             });       
+        },
+        eq:function(a,b){
+            if (!a || !b || a.length !==b.length) return false;
+            return a.reduce(function(p,c,i){
+                return p && c === b[i]
+            },true);
         }
     };
     return ret;
