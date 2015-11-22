@@ -63,9 +63,21 @@ var array = (function(){
                 return Math.floor(Math.random()*(hi - low)) + low;
             });
         },
+        zip: function(){
+            var r=ret.slice(arguments);
+            var l=r.reduce(function(p,c){
+                //returns c.length if p is underfined.
+                return p < c.length ? p : c.length;
+            },r[0].length);
+            return ret.arange(l).map(function(i){
+                return r.map(function(d){
+                   return d[i];
+                });
+            });
+        },
         pairs: function(arr){
-            return ret.arr.map(function(c,i){
-                return ret.arr.slice(i+1).map(function(d){
+            return ret.arr().map(function(c,i){
+                return ret.arr().slice(i+1).map(function(d){
                     return [c,d];
                 });
             }).reduce(function(p,c){
