@@ -6,6 +6,8 @@ function importinto(ns, targetns) {
 }
 var $dom={};
 
+function objhas(o,a){if(o) return o[a];}
+
 var array = (function(){
     function mkarraycall(callname) {
         return Array.prototype[callname].call.bind(Array.prototype[callname]);
@@ -116,6 +118,8 @@ function byclass(el,clas) {
     var ret = array.slice(el.getElementsByClassName(clas));
     return ret.length === 1 ? ret[0] : ret;
 }
+function byq(q){return document.querySelector(q);}
+function byqs(q){return document.querySelectorAll(q);}
 function idof(el){return $dom.$toel(el).id;}
 function lefttop(x){
     x = $dom.$toel(x).getBoundingClientRect();
@@ -368,7 +372,11 @@ $dom = (function(){
             return ret.length && ret.length>1 ?
                    ret.map(function(c){return $(c);}) :
                    $(ret);
-        }
+        },
+        $byq: function(q){ return new _$(byq(q));},
+        $byqs: function(q){ return byqs(q).map(
+            function(c){return new _$(byq(q));}
+        )}
     }
     importinto(factories, ret);
     exportv(factories,"factories");
@@ -391,11 +399,17 @@ function mkxhr(){
     return null;
 }
 //my fetch-like.
-function request(to,message,type){
+function request(to,message,method, opts){
     var xhr = mkxhr();
-    if(!type) type = "GET";
-    xhr.open(type,to);
-    xhr.setRequestHeader('Content-type', 'application/x-www-from-urlencoded');
+    !method && (method = "GET");
+    xhr.open(method,to);
+    var contenttype = opts && opts.contenttype ?
+                       opts.contenttype :
+                       'application/x-www-from-urlencoded';
+    xhr.setRequestHeader('Content-type', contenttype);
+    if(opts && opts.overrideMimeType){
+        xhr.overrideMimeType(opts.overrideMimeType);
+    }
     try{ xhr.send(message); } catch (e){console.log("error caught in send: %o",e)}
     xhr._callbacks = [];
     xhr.onreadystatechange = function(){
