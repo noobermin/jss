@@ -374,9 +374,9 @@ $dom = (function(){
                    $(ret);
         },
         $byq: function(q){ return new _$(byq(q));},
-        $byqs: function(q){ return byqs(q).map(
+        $byqs: function(q){ return array.map(byqs(q),
             function(c){return new _$(byq(q));}
-        )}
+        );}
     }
     importinto(factories, ret);
     exportv(factories,"factories");
