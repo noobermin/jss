@@ -8,6 +8,35 @@ var $dom={};
 
 function objhas(o,a){if(o) return o[a];}
 
+//hack that is better than date objects for me.
+var timems = (function(){
+    var lib={};
+    function mktime(ms){
+        var d = new Date(ms);
+        var e = new Date(0);
+        function getparam(pname){
+            var methname='getUTC'+pname;
+            return d[methname]()-e[methname]();
+        }
+        var ret = {};
+        [
+            ['yr','FullYear'],
+            ['mon','Month'],
+            ['day','Day'],
+            ['hr','Hours'],
+            ['min','Minutes'],
+            ['sec','Seconds'],
+            ['ms','Milliseconds']
+        ].forEach(function(c){
+            ret[c[0]] = getparam(c[1]);
+            ret[c[1]] = getparam(c[1]);
+        });
+        return ret;
+    }
+    lib.mktime=mktime;
+    return lib;
+})();
+
 var array = (function(){
     function mkarraycall(callname) {
         return Array.prototype[callname].call.bind(Array.prototype[callname]);
