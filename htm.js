@@ -6,7 +6,14 @@ function importinto(ns, targetns) {
 }
 var $dom={};
 
-function objhas(o,a){if(o) return o[a];}
+function objhas(o){
+    if(!o) return;
+    return slice(arguments,1).map(function(c){
+        return o[a] !== undefined;
+    }).reduce(function(p,c){
+        return p && c;
+    },false);
+}
 
 //hack that is better than date objects for me.
 var timems = (function(){
@@ -465,4 +472,5 @@ function request(to,message,method, opts){
 if(typeof exports !== 'undefined') {
     exports.array = array;
     exports.importinto = importinto;
+    exports.objhas = objhas;
 }
