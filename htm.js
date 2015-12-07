@@ -8,11 +8,21 @@ var $dom={};
 
 function objhas(o){
     if(!o) return;
-    return slice(arguments,1).map(function(c){
+    return array.slice(arguments,1).map(function(c){
         return o[a] !== undefined;
     }).reduce(function(p,c){
         return p && c;
-    },false);
+    },true);
+}
+//for reading out particular elements
+//of an object, meant for options sent to a function.
+//Only is really useful with es6 destructuring
+function objreadout(o){
+    if(!o) return;
+    //obviously only works for a single depth
+    return array.map(arguments,function(c){
+        return o[c];
+    });
 }
 
 //hack that is better than date objects for me.
