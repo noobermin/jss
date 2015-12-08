@@ -36,58 +36,17 @@ var obj = (function(){
             if(!o) return {l:d};
             o[l]=d;
             return o;
+        },
+        choice:function(d){
+            var o={};
+            slice(arguments,2).forEach(function(c){
+                if(d[c]) o[c] = d[c];
+            });
+            return o;
         }
     };
     return lib;
 })();
-
-//hack that is better than date objects for me.
-var timems = (function(){
-    var lib={};
-    function mktime(ms){
-        var d = new Date(ms);
-        var e = new Date(0);
-        function getparam(pname){
-            var methname='getUTC'+pname;
-            return d[methname]()-e[methname]();
-        }
-        var ret = {};
-        [
-            ['yr','FullYear'],
-            ['mon','Month'],
-            ['day','Day'],
-            ['hr','Hours'],
-            ['min','Minutes'],
-            ['sec','Seconds'],
-            ['ms','Milliseconds']
-        ].forEach(function(c){
-            ret[c[0]] = getparam(c[1]);
-            ret[c[1]] = getparam(c[1]);
-        });
-        return ret;
-    }
-    lib.mktime=mktime;
-    return lib;
-})();
-
-function objhas(o){
-    if(!o) return;
-    return array.slice(arguments,1).map(function(c){
-        return o[a] !== undefined;
-    }).reduce(function(p,c){
-        return p && c;
-    },true);
-}
-//for reading out particular elements
-//of an object, meant for options sent to a function.
-//Only is really useful with es6 destructuring
-function objreadout(o){
-    if(!o) return;
-    //obviously only works for a single depth
-    return array.map(arguments,function(c){
-        return o[c];
-    });
-}
 
 //hack that is better than date objects for me.
 var timems = (function(){
