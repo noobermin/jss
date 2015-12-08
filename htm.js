@@ -5,6 +5,70 @@ function importinto(ns, targetns) {
     }
 }
 var $dom={};
+var obj = (function(){
+    var lib = {
+        has:function(o){
+            if(!o) return;
+            return array.slice(arguments,1).map(function(c){
+                return o[a] !== undefined;
+            }).reduce(function(p,c){
+                return p && c;
+            },true);
+        },
+        //for reading out particular elements
+        //of an object, meant for options sent to a function.
+        //Only is really useful with es6 destructuring
+        readout:function(o){
+            if(!o) return;
+            //obviously only works for a single depth
+            return array.map(arguments,function(c){
+                return o[c];
+            });
+        },
+        cat:function(o,d){
+            if(!o)return d;
+            for (i in d){
+                o[i] = d[i];
+            }
+            return o;
+        },
+        add:function(o,l,d){//I'm 26 this year, fitting.
+            if(!o) return {l:d};
+            o[l]=d;
+            return o;
+        }
+    };
+    return lib;
+})();
+
+//hack that is better than date objects for me.
+var timems = (function(){
+    var lib={};
+    function mktime(ms){
+        var d = new Date(ms);
+        var e = new Date(0);
+        function getparam(pname){
+            var methname='getUTC'+pname;
+            return d[methname]()-e[methname]();
+        }
+        var ret = {};
+        [
+            ['yr','FullYear'],
+            ['mon','Month'],
+            ['day','Day'],
+            ['hr','Hours'],
+            ['min','Minutes'],
+            ['sec','Seconds'],
+            ['ms','Milliseconds']
+        ].forEach(function(c){
+            ret[c[0]] = getparam(c[1]);
+            ret[c[1]] = getparam(c[1]);
+        });
+        return ret;
+    }
+    lib.mktime=mktime;
+    return lib;
+})();
 
 function objhas(o){
     if(!o) return;
@@ -482,5 +546,5 @@ function request(to,message,method, opts){
 if(typeof exports !== 'undefined') {
     exports.array = array;
     exports.importinto = importinto;
-    exports.objhas = objhas;
+    exports.obj = obj;
 }
