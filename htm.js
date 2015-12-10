@@ -10,7 +10,7 @@ var obj = (function(){
         has:function(o){
             if(!o) return;
             return array.slice(arguments,1).map(function(c){
-                return o[a] !== undefined;
+                return o[c] !== undefined;
             }).reduce(function(p,c){
                 return p && c;
             },true);
@@ -37,12 +37,15 @@ var obj = (function(){
             o[l]=d;
             return o;
         },
-        choice:function(d){
+        take:function(d){
             var o={};
             slice(arguments,2).forEach(function(c){
                 if(d[c]) o[c] = d[c];
             });
             return o;
+        },
+        choice:function(o,l,e){
+            return o && o[l] ? o[l] : e;
         }
     };
     return lib;
@@ -455,8 +458,8 @@ $dom = (function(){
 
 //xmlhttprequest
 function mkxhr(){
-    if (window.XMLHttpRequest){ return new XMLHttpRequest();}
-    else if (window.ActiveXObject) {
+    if (XMLHttpRequest){ return new XMLHttpRequest();}
+    else if (ActiveXObject) {
 	    var ret=null;
 	    try { ret = new ActiveXObject("Msxml2.XMLHTTP");}
 	    catch (e) {
@@ -468,14 +471,13 @@ function mkxhr(){
     return null;
 }
 //my fetch-like.
-function request(to,message,method, opts){
+function request(to,message,opts){
+    gopt= function(l,e){return obj.choice(opts,l,e);};
     var xhr = mkxhr();
-    !method && (method = "GET");
+    var method = gopt('method','GET');
     xhr.open(method,to);
-    var contenttype = opts && opts.contenttype ?
-                       opts.contenttype :
-                       'application/x-www-from-urlencoded';
-    xhr.setRequestHeader('Content-type', contenttype);
+    var mimetype = gopt('mimetype','application/x-www-from-urlencoded');
+    xhr.setRequestHeader('Content-type', mimetype);
     if(opts && opts.overrideMimeType){
         xhr.overrideMimeType(opts.overrideMimeType);
     }
@@ -500,7 +502,12 @@ function request(to,message,method, opts){
     };
     return xhr;
 }
-
+function jsonreq(to,message,opts){
+    opts = obj.cat(
+        opts,{method:"POST",
+              mimetype:"application/json"});
+    return request(to,message,opts)
+}
 //exporting node stuff
 if(typeof exports !== 'undefined') {
     exports.array = array;
