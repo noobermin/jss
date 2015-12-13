@@ -37,14 +37,14 @@ function mkfileread(type,prefix,errhandle) {
             function (err,data){
 	            if(err) errhandle(res);
                 else    endres(res,data,200,type);
-	        });
+            });
     };
 }
 function handlenonpost(req,res){
 	console.log("Attempted not to post to "+url.parse(req.url).pathname);
 }
 function mkpostreader(handler,opts){
-    var passResponse = opts&&opts.passResponse?opts.passResponse:false,
+    var passResponse = opts&&opts.passResponse?opts.passResponse:true,
         nonpostf   = opts&&opts.nonpostf?opts.nonpostf:handlenonpost,
         contenttype  = opts&&opts.contenttype?opts.contenttype:"text/plain";
     return function(req,res) {
