@@ -25,7 +25,7 @@ function mkxhr(){
 }
 //my fetch-like.
 function request(to,message,opts){
-    gopt= function(l,e){return obj.choice(opts,l,e);};
+    var gopt= function(l,e){return obj.choice(opts,l,e);};
     var xhr = mkxhr();
     var method = gopt('method','GET');
     xhr.open(method,to);
