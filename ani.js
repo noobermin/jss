@@ -2,9 +2,11 @@
 //   {prop:{from:..,to:...,easer:...},..}, {time:...,steps:...,easer:...}, donef)
 function _anim(el, anims, timing, donef){
     el = $toel(el);
-    var [time, steps] = timing ?
-                        [timing.time, timing.steps] :
-                        [false,false];
+    var time, step;
+    if (timing) {
+        time = timing.time;
+        steps= timing.steps;
+    }
     !steps && (steps=40);
     !time  && (time=1000);
     if (!timing || !timing.easer)
