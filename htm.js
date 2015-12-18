@@ -51,6 +51,12 @@ var obj = (function(){
     return lib;
 })();
 
+var helpers = {
+    other_args:function(a) {
+        return Array.isArray(a[1]) ? a[1] : arr.slice(a,1);
+    }
+};
+
 //hack that is better than date objects for me.
 var timems = (function(){
     var lib={};
@@ -81,22 +87,25 @@ var timems = (function(){
 })();
 
 var array = (function(){
-    function mkarraycall(callname) {
-        return Array.prototype[callname].call.bind(Array.prototype[callname]);
-    }
-    var concat = mkarraycall("concat"),
-        slice = mkarraycall("slice");
+    function mkarraycall(callname){
+        return Array.prototype[
+            callname
+        ].call.bind(Array.prototype[callname]);}
     var ret = {
-        map:mkarraycall("map"),
+        map:   mkarraycall("map"),
         filter:mkarraycall("filter"),
-        concat:concat,
+        concat:mkarraycall("concat"),
         reduce:mkarraycall("reduce"),
-        slice:slice,
+        slice: mkarraycall("slice"),
         concatv:function(arraylike,lists) {
             return concat.apply(concat,concat([arraylike],lists));
         },
         //convience functions
-        has: function(arraylike,ino){return filter(arraylike,function(c){return c == ino}).length > 0;},
+        has: function(arraylike,ino){
+            return filter(
+                arraylike,
+                function(c){return c == ino}
+            ).length > 0;},
         last:function(arraylike){ return arraylike[arraylike.length-1]; },
         setlast: function(arraylike,d){ arraylike[arraylike.length-1]=d; },
         findfirst: function(arraylike, func) {
@@ -231,7 +240,6 @@ var dom = (function(){
             c[n] = v;
         });
     }
-    
     function mk(el,attr,classes,html){
         if (attr) for (prop in attr)
 	        el.setAttributeNS(null,prop,attr[prop]);
@@ -252,12 +260,8 @@ var dom = (function(){
     };
     importinto(create, ret);
     exportv(create,"create");
-
     
-    function other_args(a){
-        return Array.isArray(a[1]) ? a[1] : arr.slice(a,1);
-    }
-
+    var other_args = helpers.other_args;
     var modify={
         append: function(el) {
             el = $dom.$toel(el);
@@ -307,7 +311,8 @@ var dom = (function(){
         },
         evliss: function() {
             for(var i=1; i< arguments.length; i+=2)
-	            modify.evlis(arguments[0], arguments[i], arguments[i+1],false);
+	            modify.evlis(arguments[0], arguments[i],
+                             arguments[i+1],false);
             return arguments[0];
         },
         insert_after: function(el, before) {
@@ -350,6 +355,12 @@ var dom = (function(){
 	            }
             }
         },
+        rmevlis: function(el, type, f, c){
+            el = $dom.$toel(el);
+            (typeof c==="undefined") && (c=true);
+            el.removeEventListener(type,f,c);
+            return el;
+        },
         inner: function(el,innert) {
             el = $dom.$toel(el);
             if(!innert) return el.innerHTML;
@@ -370,7 +381,7 @@ var dom = (function(){
             el = $dom.$toel(el);
             if( arguments.length == 2) return el[arguments[1]];
             else for(var i=1; i < arguments.length; i+=2) {
-	            el.setAttribute(arguments[i],arguments[i+1]);
+	            el[arguments[i]]=arguments[i+1];
             }
             return el;
         },
@@ -405,7 +416,7 @@ $dom = (function(){
             c[n] = v;
         });
     }
-
+    
     //
     //my super element wrapper type
     //
