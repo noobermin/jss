@@ -53,7 +53,7 @@ var obj = (function(){
 
 var helpers = {
     other_args:function(a) {
-        return Array.isArray(a[1]) ? a[1] : arr.slice(a,1);
+        return Array.isArray(a[1]) ? a[1] : array.slice(a,1);
     }
 };
 
