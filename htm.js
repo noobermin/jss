@@ -46,6 +46,14 @@ var obj = (function(){
         },
         choice:function(o,l,e){
             return o && o[l] ? o[l] : e;
+        },
+        fcall:function(f){
+            if (f && f.apply)
+                return f.apply(null, array.slice(arguments, 1));
+        },
+        fapply:function(f,a){
+            if (f && f.apply)
+                return f.apply(null, array.slice(a));
         }
     };
     return lib;
