@@ -1,10 +1,11 @@
+//utility to import a namespace
 function importinto(ns, targetns) {
     if(!targetns) targetns = window;
     for(name in ns) {
         targetns[name]=ns[name];
     }
 }
-var $dom={};
+
 var obj = (function(){
     var lib = {
         has:function(o){
@@ -58,7 +59,35 @@ var obj = (function(){
     };
     return lib;
 })();
-
+//I'm going to recreate cookie shit
+var cookier = {
+    getr:function(name){
+        var r = new RegExp(
+            "(?:^|.*;\\s*)"+name+"\\s*\\=\\s*([^;]*).*$");
+        return document.cookie.replace(r, "$1");
+    },
+    get:function(){
+        var args=array.slice(arguments);
+        if (args.length === 1)
+            return decodeURIComponent(
+                cookier.getr(args[0]));
+        var o = {};
+        args.map(function(c){
+            obj.add(o, c,
+                    decodeURIComponent(
+                        cookier.getr(c)));
+            });
+        return o;
+    },
+    setr:function(name,value){
+        document.cookie = name+"="+encodeURIComponent(value);
+    },
+    set:function(){
+        array.apairs(arguments).forEach(function(c){
+            cookier.setr.apply(null,c);
+        });
+    }
+}
 var helpers = {
     other_args:function(a) {
         return Array.isArray(a[1]) ? a[1] : array.slice(a,1);
@@ -99,7 +128,7 @@ var array = (function(){
         return Array.prototype[
             callname
         ].call.bind(Array.prototype[callname]);}
-    var ret = {
+    var lib = {
         map:   mkarraycall("map"),
         filter:mkarraycall("filter"),
         concat:mkarraycall("concat"),
@@ -127,19 +156,19 @@ var array = (function(){
             return -1;
         },
         arr: function (n,fill) {
-            if (fill===undefined) fill=0;
-            if (n===undefined) n=0;
+            (!fill) && (fill=0);
+            (!n)    && (n=0);
             var arr = [];
             for(;n!=0;--n) arr.push(fill);
             return arr;
         },
         rnd: function(n,low,hi) {
-            if (low===undefined) low =0;
+            (!low)  && (low=0);
             if (hi===undefined) hi =1;
             var t = low; low = Math.min(low,hi);
             hi = Math.max(t,hi);
             if (n == 1) return Math.random()*(hi - low) + low;
-            return ret.arr(n).map(function(c){
+            return lib.arr(n).map(function(c){
                 return Math.random()*(hi - low) + low;
             });
         },
@@ -150,30 +179,31 @@ var array = (function(){
             hi = Math.max(t,hi);
             ++hi;
             if (n == 1) return Math.floor(Math.random()*(hi - low)) + low;
-            return ret.arr(n).map(function(c){
+            return lib.arr(n).map(function(c){
                 return Math.floor(Math.random()*(hi - low)) + low;
             });
         },
         zip: function(){
-            var r=ret.slice(arguments);
+            var r=lib.slice(arguments);
             var l=r.reduce(function(p,c){
                 //returns c.length if p is underfined.
                 return p < c.length ? p : c.length;
             },r[0].length);
-            return ret.arange(l).map(function(i){
+            return lib.arange(l).map(function(i){
                 return r.map(function(d){
                    return d[i];
                 });
             });
         },
-        pairs: function(arr){
-            return ret.arr().map(function(c,i){
-                return ret.arr().slice(i+1).map(function(d){
-                    return [c,d];
-                });
-            }).reduce(function(p,c){
-                return p.concat(c);
-            });
+        pairs: function(){
+            var r=lib.slice(arguments);
+            var v=[];
+            for(var i=0; i < r.length; i+=2) 
+                v.push([r[i],r[i+1]]);
+            return v;
+        },
+        apairs: function(arr){
+            return lib.pairs.apply(null,arr);
         },
         arange: function(start,end,step){
             !step && (step = 1);
@@ -183,7 +213,7 @@ var array = (function(){
             var n = Math.round((end-start)/step);
             if(n<0)return [];
             
-            return ret.arr(n).map(function(c,i){
+            return lib.arr(n).map(function(c,i){
                 return i*step + start;
             });       
         },
@@ -194,7 +224,7 @@ var array = (function(){
             },true);
         }
     };
-    return ret;
+    return lib;
 })();
 
 //aliases
@@ -407,7 +437,7 @@ var dom = (function(){
     return ret;
 })();
 
-$dom = (function(){
+var $dom = (function(){
     var arr = array, D=dom;
     var ret = {};
     function exportf(a){
