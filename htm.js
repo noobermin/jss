@@ -40,7 +40,7 @@ var obj = (function(){
         },
         take:function(d){
             var o={};
-            slice(arguments,2).forEach(function(c){
+            array.slice(arguments,1).forEach(function(c){
                 if(d[c]) o[c] = d[c];
             });
             return o;
@@ -122,6 +122,37 @@ var timems = (function(){
     lib.mktime=mktime;
     return lib;
 })();
+
+//accumulators
+var acc = {
+    max:function(){
+        var val;
+        return {
+            acc:function(a){
+                if (!val || a > val) val = a;
+            },
+            get:function(){return val;}
+        };
+    },
+    min:function(){
+        var val;
+        return {
+            acc:function(a){
+                if (!val || a < val) val = a;
+            },
+            get:function(){return val;}
+        };
+    },
+    sum:function(){
+        var val=0;
+        return {
+            acc:function(a){
+                val+=a;
+            },
+            get:function(){return val;}
+        };
+    }
+};
 
 var array = (function(){
     function mkarraycall(callname){
