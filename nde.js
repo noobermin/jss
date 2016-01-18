@@ -14,7 +14,6 @@ function endres(res, resp, status, type) {
 //default handlers
 function interror(r){endres(r,"500--internal error", 500);}
 function badreq(r)  {endres(r,"400--bad request",    400);}
-function forbidden(r)  {endres(r,"403--forbidden",   403);}
 function notfound(r){endres(r,"404--not found",      404);}
 
 function mkrouter(site,spec){
