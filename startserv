@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+#Testing server
+# Of course, for a serious server, the dbsecret should be super random
+# and the salt should at least be something other than "salt" :)
+export TREE_DBSECRET=$( \
+    [ -z "$TREE_DBSECRET" ] && echo "secret" || echo $TREE_DBSECRET)
+export TREE_USALT=$( \
+    [ -z "$TREE_USALT" ] && echo "salt" || echo $TREE_USALT)
+export TREE_DBSPORT=$( \
+    [ -z "$TREE_DBSPORT" ] && echo 8090 || echo $TREE_DBSPORT)
+export TREE_SERVPORT=$( \
+    [ -z "$TREE_SERVPORT" ] && echo 8080 || echo $TREE_SERVPORT)
+
+node dbs.js&
+DBSPID=$!
+node serv.js&
+SERVPID=$!
+#mac os x is inferior
+tail -f /dev/null
+
+kill $DBSPID
+kill $SERVPID
