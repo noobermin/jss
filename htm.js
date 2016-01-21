@@ -1,4 +1,6 @@
-if (!array || !obj 
+if (!array || !obj)
+    throw "Please load array and object before loading this!";
+
 //I'm going to recreate cookie shit
 var cookier = {
     getr:function(name){
@@ -62,6 +64,10 @@ var timems = (function(){
     lib.mktime=mktime;
     return lib;
 })();
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
 //aliases
 function byid(id){return document.getElementById(id);}
 function byclass(el,clas) {
