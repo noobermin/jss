@@ -64,10 +64,7 @@ var timems = (function(){
     lib.mktime=mktime;
     return lib;
 })();
-<<<<<<< HEAD
-=======
 
->>>>>>> master
 //aliases
 function byid(id){return document.getElementById(id);}
 function byclass(el,clas) {

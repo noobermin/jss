@@ -168,7 +168,8 @@ var fn = {
         return array.slice(arguments).reduce(
             function(p,c){ return function(x){return c(p(x))}},
             function(x){return x;});
-    }
+    },//why not?
+    map: array.map
 };
 
 //accumulators
