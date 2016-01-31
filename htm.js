@@ -1,3 +1,12 @@
+var array = array || null;
+var obj = obj || null;
+var importinto = importinto || null;
+if (typeof require !== 'undefined'){
+    var fn = require('./fn');
+    array      = fn.array;
+    obj        = fn.obj;
+    importinto = fn.importinto;
+}
 if (!array || !obj)
     throw "Please load array and object before loading this!";
 

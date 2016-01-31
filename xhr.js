@@ -7,7 +7,7 @@ var XMLHttpRequest = (function(){
     }
 })();
 if (typeof require !== 'undefined'){
-    obj = require('./htm').obj;
+    obj = require('./fn').obj;
 }
 
 function mkxhr(){

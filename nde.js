@@ -1,9 +1,8 @@
 var http = require('http'),
     url = require('url'),
     querystring = require('querystring'),
-    fs = require('fs'),
-    htm = require('./htm'),
-    arr = htm.array;
+    fs = require('fs');
+    
 
 function endres(res, resp, status, type) {
     (!type)  && (type = "text/plain");

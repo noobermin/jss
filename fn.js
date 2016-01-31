@@ -120,6 +120,9 @@ var obj = (function(){
                 return p && c;
             },true);
         },
+        test:function(o, k){
+            return lib.has(o,k) && o.k;
+        },
         //for reading out particular elements
         //of an object, meant for options sent to a function.
         //Only is really useful with es6 destructuring
@@ -204,7 +207,8 @@ var acc = {
 };
 
 if (typeof exports !== 'undefined') {
-    obj.add(exports, "obj" obj);
-    obj.add(exports, "array" array);
-    obj.add(exports, "fn" fn);
+    obj.add(exports, "obj", obj);
+    obj.add(exports, "array", array);
+    obj.add(exports, "fn", fn);
+    obj.add(exports, "importinto", importinto);
 };
