@@ -121,7 +121,7 @@ var obj = (function(){
             },true);
         },
         test:function(o, k){
-            return lib.has(o,k) && o.k;
+            return lib.has(o,k) && o[k];
         },
         //for reading out particular elements
         //of an object, meant for options sent to a function.
