@@ -16,10 +16,39 @@ var array = (function(){
         concat:mkarraycall("concat"),
         reduce:mkarraycall("reduce"),
         slice: mkarraycall("slice"),
+        splice:mkarraycall("splice"),
         concatv:function(arraylike,lists) {
             return concat.apply(concat,concat([arraylike],lists));
         },
-        //convience functions
+        rm:function(arraylike) {
+            var is=lib.slice(arguments,1);
+            is.forEach(function(c,i){
+                c=c-i;
+                lib.splice(arraylike, c, 1);
+            });
+            return arraylike;
+        },
+        rmv:function(arraylike,v){
+            var args=lib.concat([arraylike],v);
+            fn.apply(lib.rm,args);
+        }
+        find:function(arraylike,val){
+            var ret=[];
+            lib.slice(arraylike).forEach(function(c,i){
+                if (c == val){
+                    ret.append(i);
+                }
+            });
+            return ret;
+        }
+        rmfirst:function(arraylike,val){
+            var matches=lib.find(arraylike,val);
+            return lib.rm(arraylike, matches[0]);
+        }
+        rmmatch:function(arraylike,val){
+            var matches=lib.find(arraylike,val);            
+            return lib.rmv(arraylike, matches);
+        },
         has: function(arraylike,ino){
             return filter(
                 arraylike,
@@ -104,7 +133,7 @@ var array = (function(){
             return a.reduce(function(p,c,i){
                 return p && c === b[i]
             },true);
-        }
+        },
     };
     return lib;
 })();
