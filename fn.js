@@ -31,7 +31,7 @@ var array = (function(){
         rmv:function(arraylike,v){
             var args=lib.concat([arraylike],v);
             fn.apply(lib.rm,args);
-        }
+        },
         find:function(arraylike,val){
             var ret=[];
             lib.slice(arraylike).forEach(function(c,i){
@@ -40,11 +40,11 @@ var array = (function(){
                 }
             });
             return ret;
-        }
+        },
         rmfirst:function(arraylike,val){
             var matches=lib.find(arraylike,val);
             return lib.rm(arraylike, matches[0]);
-        }
+        },
         rmmatch:function(arraylike,val){
             var matches=lib.find(arraylike,val);            
             return lib.rmv(arraylike, matches);
