@@ -26,7 +26,8 @@ function mkxhr(){
 //my fetch-like.
 function request(to,message,opts){
     var gopt= function(l,e){return obj.choice(opts,l,e);};
-    var xhr = mkxhr();
+    var xhr = null;
+    xhr = mkxhr();
     var method = gopt('method','GET');
     xhr.open(method,to);
     var mimetype = gopt('mimetype','application/x-www-from-urlencoded');
@@ -34,7 +35,6 @@ function request(to,message,opts){
     if(opts && opts.overrideMimeType){
         xhr.overrideMimeType(opts.overrideMimeType);
     }
-    try{ xhr.send(message); } catch (e){console.log("error caught in send: ",e)}
     xhr._callbacks = [];
     xhr.onreadystatechange = function(){
         if (xhr.readyState === 4) {
@@ -53,6 +53,11 @@ function request(to,message,opts){
         });
         return xhr;
     };
+    xhr.start= function(){
+        try{ xhr.send(message); } catch (e){console.log("xhr.js: error caught in send: ",e)}
+    };
+    (!opts.dontsend) && xhr.start();
+    
     return xhr;
 }
 function jsonreq(to,message,opts){

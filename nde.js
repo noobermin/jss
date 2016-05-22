@@ -11,22 +11,28 @@ function endres(res, resp, status, type) {
     res.end(resp);
 }
 //default handlers
-function interror(r){endres(r,"500--internal error", 500);}
-function badreq(r)  {endres(r,"400--bad request",    400);}
-function forbidden(r)  {endres(r,"403--forbidden",   403);}
-function notfound(r){endres(r,"404--not found",      404);}
+function interror(r){
+    console.log("oh no, internal error!");
+    endres(r,"500--internal error", 500);}
+function badreq(r)  {
+    endres(r,"400--bad request",    400);}
+function forbidden(r){
+    endres(r,"403--forbidden",   403);}
+function notfound(r){
+    endres(r,"404--not found",      404);}
 
 function mkrouter(site,spec){
     var notfoundf = notfound,
-        errh      = true;
+        mkerrh    = null;
     if (spec) {
-        if (spec.notfound)
-            notfoundf=notfound;
-        errh=spec.errhandle;
-    }    
+        (spec.notfound) && (notfoundf=notfound);
+        (spec.mkerrhandler) && (mkerrh=spec.mkerrhandler);
+    }
     return function(req, res){
 	    var path = url.parse(req.url).pathname;
-        if (errh===true) {
+        if (mkerrh) {
+            errh = mkerrh(req,res);
+        } else {
             errh = function(err) {
                 if(!err) return endres(res);
                 //error handling
@@ -48,8 +54,9 @@ function mkrouter(site,spec){
                 }
             };
         }
-	    if (site[path]) {site[path](req,res,errh);}
-	    else {
+	    if (site[path]) {
+            site[path](req,res,errh);
+	    } else {
             notfoundf(res,path,req);
         }
     };
@@ -114,6 +121,7 @@ function wrap(a){return encodeURI(JSON.stringify(a));}
 function unwrap(a){return JSON.parse(decodeURI(a));}
 //require request
 
+
 exports.wrap = wrap;
 exports.unwrap = unwrap;
 exports.endres = endres;
@@ -123,3 +131,4 @@ exports.mkrouter = mkrouter;
 exports.interror = interror;
 exports.badreq = badreq;
 exports.notfound = notfound;
+exports.forbidden = forbidden;
