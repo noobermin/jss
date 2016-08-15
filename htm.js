@@ -16,7 +16,8 @@ var cookier = {
         var r = new RegExp(
             "(?:^|.*;\\s*)"+name+"\\s*\\=\\s*([^;]*).*$");
         return document.cookie.replace(r, "$1");
-    },
+        "(?:^|.*;\\s*)"+name+"\\s*\\=\\s*([^;]*).*$");
+    return document.cookie.replace(r, "$1");},
     get:function(){
         var args=array.slice(arguments);
         if (args.length === 1)
@@ -37,8 +38,8 @@ var cookier = {
         array.apairs(arguments).forEach(function(c){
             cookier.setr.apply(null,c);
         });
-    }
-}
+    },
+};
 var helpers = {
     other_args:function(a) {
         return Array.isArray(a[1]) ? a[1] : array.slice(a,1);
@@ -86,9 +87,9 @@ function byclass(el,clas) {
 }
 function byq(q){return document.querySelector(q);}
 function byqs(q){return document.querySelectorAll(q);}
-function idof(el){return $dom.$toel(el).id;}
+function idof(el){return $Dom.$Dtoel(el).id;}
 function lefttop(x){
-    x = $dom.$toel(x).getBoundingClientRect();
+    x = $Dom.$Dtoel(x).getBoundingClientRect();
     return [x.left,x.top];
 }
 function setstyle(title){
@@ -149,23 +150,23 @@ var dom = (function(){
     var other_args = helpers.other_args;
     var modify={
         append: function(el) {
-            el = $dom.$toel(el);
+            el = $Dom.$Dtoel(el);
             other_args(arguments).forEach(function(c){
                 el.appendChild(
-                    $dom.$toel(c)
+                    $Dom.$Dtoel(c)
                 );
             });
             return el;
         },
         rmclass: function(el) {
-            el = $dom.$toel(el);
+            el = $Dom.$Dtoel(el);
             el.classList.remove.apply(
                 el.classList,other_args(arguments)
             );
             return el;
         },
         addclass: function(el) {
-            el = $dom.$toel(el);
+            el = $Dom.$Dtoel(el);
             el.classList.add.apply(
                 el.classList,other_args(arguments)
             );
@@ -181,7 +182,7 @@ var dom = (function(){
             return el;
         },
         hasclass: function(el){
-            el = $dom.$toel(el);
+            el = $Dom.$Dtoel(el);
             var ret= el.classList.contains.apply(
                 el.classList,
                 other_args(arguments)
@@ -189,7 +190,7 @@ var dom = (function(){
             return ret;
         },
         evlis:function(el,type,f,pass) {
-            el = $dom.$toel(el);
+            el = $Dom.$Dtoel(el);
             (!pass || pass != false) && (pass = true);
             el.addEventListener(type,f,pass);
             return el;
@@ -201,19 +202,19 @@ var dom = (function(){
             return arguments[0];
         },
         insert_after: function(el, before) {
-            el = $dom.$toel(el);
-            before = $dom.$toel(before);
+            el = $Dom.$Dtoel(el);
+            before = $Dom.$Dtoel(before);
             before.parentElement.insertBefore(el,before.nextSibling);
             return el;
         },
         insert_before: function(el, after) {
-            el = $dom.$toel(el);
-            after = $dom.$toel(after);
+            el = $Dom.$Dtoel(el);
+            after = $Dom.$Dtoel(after);
             after.parentElement.insertBefore(el,after);
             return el;
         },
         append_to: function(el, newparent){
-            el = $dom.$toel(el);
+            el = $Dom.$Dtoel(el);
             modify.append(newparent,el);
             return el;
         },
@@ -223,7 +224,7 @@ var dom = (function(){
         },
         rmel: function(el,tempclass,delay,f) {
             if(!el) return;
-            el = $dom.$toel(el);
+            el = $Dom.$Dtoel(el);
             if (tempclass && !delay) {
 	            delay = tempclass; delete tempclass;
             }
@@ -241,13 +242,13 @@ var dom = (function(){
             }
         },
         rmevlis: function(el, type, f, c){
-            el = $dom.$toel(el);
+            el = $Dom.$Dtoel(el);
             (typeof c==="undefined") && (c=true);
             el.removeEventListener(type,f,c);
             return el;
         },
         inner: function(el,innert) {
-            el = $dom.$toel(el);
+            el = $Dom.$Dtoel(el);
             if(!innert) return el.innerHTML;
             else {
 	            el.innerHTML = innert;
@@ -255,7 +256,7 @@ var dom = (function(){
             }
         },
         select_contents: function(el) {
-            el = $dom.$toel(el);
+            el = $Dom.$Dtoel(el);
             var r = document.createRange();
             r.selectNodeContents(el);
             var sel = window.getSelection();
@@ -263,7 +264,7 @@ var dom = (function(){
             sel.addRange(r);
         },
         attr: function(el) {
-            el = $dom.$toel(el);
+            el = $Dom.$Dtoel(el);
             if( arguments.length == 2) return el[arguments[1]];
             else for(var i=1; i < arguments.length; i+=2) {
 	            el[arguments[i]]=arguments[i+1];
@@ -271,7 +272,7 @@ var dom = (function(){
             return el;
         },
         attrNS: function(el) {
-            el = $dom.$toel(el);
+            el = $Dom.$Dtoel(el);
             if( arguments.length == 2) return el[arguments[1]];
             else for(var i=1; i < arguments.length; i+=2) {
 	            el.setAttributeNS(null,arguments[i],arguments[i+1]);
@@ -284,7 +285,7 @@ var dom = (function(){
     return ret;
 })();
 
-var $dom = (function(){
+var $Dom = (function(){
     var arr = array, D=dom;
     var ret = {};
     function exportf(a){
@@ -308,12 +309,12 @@ var $dom = (function(){
     function applier(f,el,args){
         return f.apply(f, [el].concat(arr.slice(args)));
     }
-    function _$(el){
+    function _$D(el){
         this.el = el;
-        this.__iama_$ = true;
+        this.__iama_$D = true;
     }
     function addDmethod(name){
-        _$.prototype[name] = function(){
+        _$D.prototype[name] = function(){
             var ret = applier(D[name], this.el, arguments);
             return ret && ret.nodeType ? this : ret; //ick
         };
@@ -321,29 +322,31 @@ var $dom = (function(){
     for(name in D.modify){
         addDmethod(name);
     }
-    _$.prototype.id = function() { return idof(this.el); };
-    exportf(_$);
+    _$D.prototype.id = function() { return idof(this.el); };
+    exportf(_$D);
     
     //other goodies
-    function is$(el) { return el && el.__iama_$; }; exportf(is$);
-    function $toel(el) { return is$(el) ? el.el : el; }; exportf($toel);
+    function is$D(el){
+        return el && el.__iama_$D; }; exportf(is$D);
+    function $Dtoel(el) {
+        return is$D(el) ? el.el : el; }; exportf($Dtoel);
     
-    function $(el){return !is$(el) ? new _$(el) : el; }
+    function $D(el){return !is$D(el) ? new _$D(el) : el; }
     //creation functions
     var factories = {
-        $:$, //MONEY
-        $byid: function(id) { return new _$(byid(id));},
-        $mkel: function(a,b,c,d){return factories.$(mkel(a,b,c,d));},    
-        $mksvg:function(a,b,c,d){return factories.$(mksvg(a,b,c,d));},
+        $D:$D, //MONEY
+        $byid: function(id) { return new _$D(byid(id));},
+        $mkel: function(a,b,c,d){return factories.$D(mkel(a,b,c,d));},    
+        $mksvg:function(a,b,c,d){return factories.$D(mksvg(a,b,c,d));},
         $byclass: function(a,b){
             var ret = byclass(a,b);
             return ret.length && ret.length>1 ?
-                   ret.map(function(c){return $(c);}) :
-                   $(ret);
+                   ret.map(function(c){return $D(c);}) :
+                   $D(ret);
         },
-        $byq: function(q){ return new _$(byq(q));},
+        $byq: function(q){ return new _$D(byq(q));},
         $byqs: function(q){ return array.map(
-            byqs(q),  function(c){return new _$(c);});
+            byqs(q),  function(c){return new _$D(c);});
         }
     }
     importinto(factories, ret);
