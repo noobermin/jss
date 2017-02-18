@@ -137,8 +137,6 @@ var array = (function(){
     };
     return lib;
 })();
-
-
 var obj = (function(){
     var lib = {
         has:function(o){
@@ -187,6 +185,16 @@ var obj = (function(){
     };
     return lib;
 })();
+
+//This is like a getkw thing I use in python
+//for everything.
+function mk_getkw(kw,defaults){
+    return function(l){
+        return obj.choice(kw,l,defaults[l]);
+    };
+}
+
+
 var fn = {
     call:function(f){
         if (f && f.apply)
@@ -240,4 +248,5 @@ if (typeof exports !== 'undefined') {
     obj.add(exports, "array", array);
     obj.add(exports, "fn", fn);
     obj.add(exports, "importinto", importinto);
+    obj.add(exports, "mk_getkw", mk_getkw);
 };
