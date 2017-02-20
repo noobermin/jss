@@ -15,9 +15,7 @@ var cookier = {
     getr:function(name){
         var r = new RegExp(
             "(?:^|.*;\\s*)"+name+"\\s*\\=\\s*([^;]*).*$");
-        return document.cookie.replace(r, "$1");
-        "(?:^|.*;\\s*)"+name+"\\s*\\=\\s*([^;]*).*$");
-    return document.cookie.replace(r, "$1");},
+        return document.cookie.replace(r, "$1");},
     get:function(){
         var args=array.slice(arguments);
         if (args.length === 1)
