@@ -138,7 +138,7 @@ var dom = (function(){
             return mk(document.createElement(type),attr,classes,html);
         },
         mksvg: function(type, attr, classes, html) {
-            mk(document.createElementNS("http://www.w3.org/2000/svg",type),
+            return mk(document.createElementNS("http://www.w3.org/2000/svg",type),
                attr,classes,html);
         }
     };
